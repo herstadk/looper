@@ -1,16 +1,18 @@
 import React from 'react';
+import ControlPanel from './ControlPanel';
 import { Colors } from '../../styles/colors';
 
 const containerStyle = {
-  display: 'flex',
   height: '100%',
   width: '100%',
-  color: Colors.white,
+  display: 'flex',
+  flexFlow: 'column',
 };
 
-const EditTrackContainer = () => {
+const CreateTrackContainer = () => {
   return (
     <div style={containerStyle}>
+      <ControlPanel />
       <div
         style={{
           color: Colors.white,
@@ -20,10 +22,10 @@ const EditTrackContainer = () => {
           justifyContent: 'center',
         }}
       >
-        Edit Track
+        Create Track
       </div>
     </div>
   );
 };
 
-export default EditTrackContainer;
+export default CreateTrackContainer;
