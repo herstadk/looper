@@ -7,6 +7,7 @@ const Recorder = () => {
     video: false,
     audio: true,
   });
+
   return (
     <>
       <RecordButton

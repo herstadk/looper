@@ -7,13 +7,15 @@ const controlPanelStyle = {
   width: '100%',
   height: '200px',
   backgroundColor: Colors.black,
-  alignItems: 'center'
+  alignItems: 'center',
 };
 
 const ControlPanel = () => {
-  return <div style={controlPanelStyle}>
+  return (
+    <div style={controlPanelStyle}>
       <Recorder />
-  </div>;
+    </div>
+  );
 };
 
 export default ControlPanel;

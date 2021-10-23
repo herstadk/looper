@@ -10,13 +10,23 @@ const buttonStyle = {
 const RecordButton = (props) => {
   const { onClick, isRecording } = props;
   return (
-    <IconContext.Provider value={{ color: Colors.green, size: 100 }}>
-      {isRecording ? (
-        <FaStop onClick={() => onClick()} style={buttonStyle} />
-      ) : (
-        <FaPlay onClick={() => onClick()} style={buttonStyle} />
-      )}
-    </IconContext.Provider>
+    <div data-testid={'record-button'}>
+      <IconContext.Provider value={{ color: Colors.green, size: 100 }}>
+        {isRecording ? (
+          <FaStop
+            data-testid={'stop-icon'}
+            onClick={() => onClick()}
+            style={buttonStyle}
+          />
+        ) : (
+          <FaPlay
+            data-testid={'play-icon'}
+            onClick={() => onClick()}
+            style={buttonStyle}
+          />
+        )}
+      </IconContext.Provider>
+    </div>
   );
 };
 
