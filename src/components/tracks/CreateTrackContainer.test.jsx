@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import mockMediaRecorder from '../../mocks/MockMediaRecorder';
+import MockMediaRecorder from '../../mocks/MockMediaRecorder';
 import CreateTrackContainer from './CreateTrackContainer';
 
 describe('Create track container', () => {
   beforeEach(() => {
     window.MediaRecorder = jest
       .fn()
-      .mockImplementation(() => mockMediaRecorder);
+      .mockImplementation(() => MockMediaRecorder);
   });
 
   it('Renders placeholder text', () => {

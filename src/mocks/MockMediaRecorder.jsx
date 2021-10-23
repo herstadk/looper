@@ -1,4 +1,4 @@
-const mockMediaRecorder = {
+const MockMediaRecorder = {
   start: jest.fn(),
   ondataavailable: jest.fn(),
   onerror: jest.fn(),
@@ -6,4 +6,4 @@ const mockMediaRecorder = {
   stop: jest.fn(),
 };
 
-export default mockMediaRecorder;
+export default MockMediaRecorder;
