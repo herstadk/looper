@@ -10,7 +10,7 @@ describe('Record button', () => {
 
   it('Renders stop button when recording', () => {
     render(<RecordButton isRecording={true} />);
-    const playIcon = screen.queryByTestId('stop-icon');
-    expect(playIcon).toBeInTheDocument();
+    const stopIcon = screen.queryByTestId('stop-icon');
+    expect(stopIcon).toBeInTheDocument();
   });
 });
