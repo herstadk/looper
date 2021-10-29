@@ -10,10 +10,11 @@ const controlPanelStyle = {
   alignItems: 'center',
 };
 
-const ControlPanel = () => {
+const ControlPanel = (props) => {
+  const { addMediaBlobUrl } = props;
   return (
     <div style={controlPanelStyle}>
-      <Recorder />
+      <Recorder addMediaBlobUrl={addMediaBlobUrl} />
     </div>
   );
 };
