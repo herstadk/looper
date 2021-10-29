@@ -1,6 +1,7 @@
 import React from 'react';
 import ControlPanel from './ControlPanel';
 import { Colors } from '../../styles/colors';
+import PlayContainer from './PlayContainer';
 
 const containerStyle = {
   height: '100%',
@@ -9,7 +10,7 @@ const containerStyle = {
   flexFlow: 'column',
 };
 
-const CreateTrackContainer = () => {
+const CreateTrackContainer = ({title}) => {
   return (
     <div style={containerStyle}>
       <ControlPanel />
@@ -22,10 +23,15 @@ const CreateTrackContainer = () => {
           justifyContent: 'center',
         }}
       >
-        Create Track
+        {title}
       </div>
+      <PlayContainer />
     </div>
   );
 };
+
+CreateTrackContainer.defaultProps = {
+  title: 'Create Track',
+}
 
 export default CreateTrackContainer;
