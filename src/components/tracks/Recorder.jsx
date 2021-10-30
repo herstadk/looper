@@ -2,10 +2,13 @@ import React from 'react';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import RecordButton from './RecordButton';
 
-const Recorder = () => {
+const Recorder = (props) => {
+  const { addMediaBlobUrl } = props;
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
+    blobOptions: { type: 'audio/mpeg' },
+    onStop: (newMediaBlobUrl) => addMediaBlobUrl(newMediaBlobUrl),
   });
 
   return (

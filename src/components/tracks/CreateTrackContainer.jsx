@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ControlPanel from './ControlPanel';
 import { Colors } from '../../styles/colors';
 import PlayContainer from './PlayContainer';
@@ -10,10 +10,23 @@ const containerStyle = {
   flexFlow: 'column',
 };
 
-const CreateTrackContainer = ({title}) => {
+const CreateTrackContainer = ({ title }) => {
+  const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
+
+  const addMediaBlobUrl = (newMediaBlobUrl) => {
+    setMediaBlobUrls((curMediaBlobUrls) => [
+      ...curMediaBlobUrls,
+      newMediaBlobUrl,
+    ]);
+  };
+
+  // Note: audio elements are included here for proof of concept only
   return (
     <div style={containerStyle}>
-      <ControlPanel />
+      {mediaBlobUrls.map((mediaBlobUrl, idx) => (
+        <audio src={mediaBlobUrl} key={idx} controls />
+      ))}
+      <ControlPanel addMediaBlobUrl={addMediaBlobUrl} />
       <div
         style={{
           color: Colors.white,
@@ -32,6 +45,6 @@ const CreateTrackContainer = ({title}) => {
 
 CreateTrackContainer.defaultProps = {
   title: 'Create Track',
-}
+};
 
 export default CreateTrackContainer;
