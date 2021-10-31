@@ -1,9 +1,9 @@
 import React from 'react';
 import PlayButton from './PlayButton';
 import myAudio from "../../static/rain-03.mp3";
+
 const PlayContainer = () => {
 
-    //const myAudio = "../../static/rain-03.mp3"
     var state = {
         audio: new Audio(myAudio),
         dataPlaying: false
@@ -11,11 +11,11 @@ const PlayContainer = () => {
 
     const PlayAudio = () => {
         console.log("Playing audio from function")
-        if(state.dataPlaying === false){
+        if (state.dataPlaying === false){
             console.log("Play");
             state.audio.play();
             state.dataPlaying = true;
-        }else{
+        } else {
             console.log("Pause");
             state.audio.pause();
             state.dataPlaying = false;
