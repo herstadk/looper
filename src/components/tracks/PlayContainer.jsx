@@ -1,6 +1,9 @@
 import React from 'react';
 import PlayButton from './PlayButton';
 import myAudio from "../../static/rain-03.mp3";
+import { FaPlay } from 'react-icons/fa';
+import { Colors } from '../../styles/colors';
+
 const PlayContainer = () => {
 
     //const myAudio = "../../static/rain-03.mp3"
@@ -22,6 +25,13 @@ const PlayContainer = () => {
         }   
     }
 
+    var buttonType = <FaPlay 
+    style={{
+        color: Colors.green, 
+        cursor: 'pointer' 
+        }} 
+        onClick={PlayAudio}/>
+
     return (
         <div
         style={{
@@ -34,7 +44,7 @@ const PlayContainer = () => {
             fontSize: 48,
             }}>
             
-            <PlayButton onClick = {PlayAudio} playState = {state.dataPlaying}/>
+            <PlayButton onClick = {PlayAudio} playState = {buttonType}/>
             </div>
             <div>
                 max loop
