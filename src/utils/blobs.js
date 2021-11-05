@@ -66,7 +66,7 @@ const postBlob = async (blob, name) => {
     await fetch(postURL, {
         method: 'PUT',
         headers: blobHeaders,
-        body: blob.mediaBlob
+        body: blob
     })
     .then(res => {
         if (res.ok) {

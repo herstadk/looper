@@ -7,8 +7,8 @@ async function postToAzure(blobs) {
 
     for (let blob of blobs) {
         if (!blob.saved) {
-            let 
-            postBlob(file, blobName);
+            let mediaBlob = await fetch(blob.mediaBlobUrl).then(b => b.blob());
+            postBlob(mediaBlob, blobName);
         }
     }
 }

@@ -8,7 +8,7 @@ const Recorder = (props) => {
 		video: false,
 		audio: true,
 		blobOptions: { type: 'audio/mpeg' },
-		onStop: (mediaBlobUrl, mediaBlob) => addMediaBlobUrl({ mediaBlobUrl, mediaBlob }),
+		onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
 	});
 
 	return (

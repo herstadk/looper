@@ -5,7 +5,7 @@ import { Colors } from '../../styles/colors';
 const PlayButton = ({onClick}, {playState}) => {
     
     return (
-        <div>
+        <div id="play-button" data-playing="false">
             
             <FaPlay 
                 style={{
