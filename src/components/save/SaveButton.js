@@ -1,12 +1,14 @@
 import React from 'react';
 import { postBlob } from '../../utils/blobs'; 
 
-function postToAzure(blobs) {
+// need to update thisssssssssssssssssssssssssssssssssssssssssss
+async function postToAzure(blobs) {
     let blobName = prompt("Name of audio file: ");
 
     for (let blob of blobs) {
         if (!blob.saved) {
-            postBlob(blob, blobName);
+            let 
+            postBlob(file, blobName);
         }
     }
 }

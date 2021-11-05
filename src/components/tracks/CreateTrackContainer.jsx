@@ -43,7 +43,6 @@ const CreateTrackContainer = ({ title }) => {
 
 		async function myfunc() {
 			let allBlobs = await getAllBlobs();
-			console.log(allBlobs);
 			setMediaBlobUrls([...allBlobs]);
 		}
 
@@ -65,8 +64,7 @@ const CreateTrackContainer = ({ title }) => {
 	return (
 		<div style={containerStyle}>
 			{mediaBlobUrls.map((mediaBlobUrl, idx) => {
-				console.log(mediaBlobUrl);
-				return <audio src={window.URL.createObjectURL(mediaBlobUrl.mediaBlob)} key={idx} controls />
+				return <audio src={mediaBlobUrl.mediaBlobUrl} key={idx} controls />
 			})}
 			<ControlPanel addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} />
 			<div style={titleDivStyle}>{title}</div>
