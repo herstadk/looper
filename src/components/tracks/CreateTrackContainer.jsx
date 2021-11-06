@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import { Colors } from '../../styles/colors';
 import PlayContainer from './PlayContainer';
@@ -21,15 +21,26 @@ const titleDivStyle = {
 
 const CreateTrackContainer = ({ title, audioContext }) => {
 	const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
+	const [audioBuffers, setAudioBuffers] = useState([]);
+	const [audioSource, setAudioSource] = useState(null);
+	const [isPlaying, setIsPlaying] = useState(false);
 
-	const addMediaBlobUrl = (newMediaBlobUrl) => {
-		newMediaBlobUrl.saved = false;
+	const loadAudioBuffer = useCallback((mediaBlobUrl) => {
+		const request = new XMLHttpRequest();
+		request.open("GET", mediaBlobUrl);
+		request.responseType = "arraybuffer";
+		request.onload = () => {
+			const undecodedAudio = request.response;
+			audioContext.decodeAudioData(undecodedAudio, (audioBuffer) => addAudioBuffer(audioBuffer));
+		};
+		request.send();
+	}, [audioContext])
 
-		setMediaBlobUrls((curMediaBlobUrls) => [
-			...curMediaBlobUrls,
-			newMediaBlobUrl,
-		]);
-	};
+	const loadFetchedAudioBuffers = useCallback((allBlobs) => {
+		for (const blob of allBlobs) {
+			loadAudioBuffer(blob.mediaBlobUrl);
+		}
+	}, [loadAudioBuffer])
 
 	useEffect(() => {
 		/**
@@ -41,6 +52,7 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		 */
 		async function myfunc() {
 			let allBlobs = await getAllBlobs();
+			loadFetchedAudioBuffers(allBlobs);
 			setMediaBlobUrls([...allBlobs]);
 		}
 		myfunc();
@@ -53,40 +65,74 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		 * 
 		 * 
 		 */
-	}, []);
+	}, [loadFetchedAudioBuffers]);
 
-	// add all loaded audio elements into the audio context
-	useEffect(() => {
-		const audioElement = document.getElementById('audio-1');
+	const addMediaBlobUrl = (newMediaBlobUrl) => {
+		newMediaBlobUrl.saved = false;
+		setMediaBlobUrls((curMediaBlobUrls) => [
+			...curMediaBlobUrls,
+			newMediaBlobUrl,
+		]);
+		loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
+	};
 
-		if (audioElement !== null) {
-			const track = audioContext.createMediaElementSource(audioElement);
-			track.connect(audioContext.destination);
-			
-			console.log("Adding event listener!!!!!!!!!!!!!!");
-			document.getElementById('play-button').addEventListener('click', (e) => {
-				if (e.currentTarget.dataset.playing === 'false') {
-					audioElement.play();
-					e.currentTarget.dataset.playing = 'true';
-				} else if (e.currentTarget.dataset.playing == 'true') {
-					audioElement.pause();
-					e.currentTarget.dataset.playing = 'false';
-				}
-			});
+	const addAudioBuffer = (newAudioBuffer) => {
+		setAudioBuffers((curAudioBuffers) => [
+			...curAudioBuffers,
+			newAudioBuffer,
+		]);
+	};
 
-			audioElement.addEventListener('ended', (e) => {
-				document.getElementById('play-button').dataset.playing = 'false';
-			});
+	const playAudio = () => {
+		if (audioSource) {
+			audioSource.disconnect();
+			setAudioSource(null);
 		}
-	}, [mediaBlobUrls]);
+		const source = audioContext.createBufferSource()
+		setAudioSource(source);
+		source.connect(audioContext.destination);
+		source.buffer = mixAudioBuffers(audioBuffers);
+		source.addEventListener('ended', () => setIsPlaying(false));
+		audioContext.resume();
+		setIsPlaying(true);
+		source.start();
+	};
+
+	const mixAudioBuffers = (audioBuffers) => {
+		const numChannels = getMinNumChannels(audioBuffers);
+		const length = getMaxTrackLength(audioBuffers);
+		const mix = audioContext.createBuffer(numChannels, length, audioContext.sampleRate);
+		for (const audioBuffer of audioBuffers) {
+			// Mix sound channels seperately
+			for (let channel = 0; channel < numChannels; channel++) {
+				const mixChannelBuffer = mix.getChannelData(channel);
+				const audioChannelBuffer = audioBuffer.getChannelData(channel);
+				let totalBytes = 0;
+				// Loop all but the longest track
+				while (totalBytes < length) {
+					// Sum audio byte by byte
+					for (let byte = 0; byte < audioBuffer.length; byte++) {
+						mixChannelBuffer[totalBytes] += audioChannelBuffer[byte];
+						totalBytes += 1;
+					}
+				}
+			}
+		}
+		return mix;
+	}
+
+	const getMinNumChannels = (audioBuffers) => {
+		return Math.min(...audioBuffers.map(x => x.numberOfChannels));
+	}
+
+	const getMaxTrackLength = (audioBuffers) => {
+		return Math.max(...audioBuffers.map(x => x.length));
+	}
 
 	// Note: audio elements are included here for proof of concept only
 	return (
 		<div style={containerStyle}>
-			{mediaBlobUrls.map((mediaBlobUrl, idx) => {
-				return <audio src={mediaBlobUrl.mediaBlobUrl} key={idx} id={"audio-" + idx} controls />
-			})}
-			<ControlPanel addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} />
+			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioSource={audioSource} />
 			<div style={titleDivStyle}>{title}</div>
 			<PlayContainer />
 		</div>
