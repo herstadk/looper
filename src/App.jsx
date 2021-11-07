@@ -11,13 +11,17 @@ const style = {
 	backgroundColor: Colors.charcoal,
 };
 
+// global audio context variable to pass down to components
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContext();
+
 const App = () => {
 	return (
 		<Router>
 		<div style={style} data-testid={'base-container'}>
 			<Switch>
 			<Route exact path="/">
-				<CreateTrackContainer />
+				<CreateTrackContainer audioContext={audioContext} />
 			</Route>
 			<Route exact path="/edit">
 				<EditTrackContainer />

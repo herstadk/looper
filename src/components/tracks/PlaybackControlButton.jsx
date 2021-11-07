@@ -7,12 +7,13 @@ const buttonStyle = {
 	cursor: 'pointer',
 };
 
-const RecordButton = (props) => {
-	const { onClick, isRecording } = props;
+const PlaybackControlButton = (props) => {
+	const { onClick, isPlaying } = props;
+
 	return (
 		<div data-testid={'record-button'}>
 			<IconContext.Provider value={{ color: Colors.green, size: 100 }}>
-				{isRecording ? (
+				{isPlaying ? (
 					<FaStop
 						data-testid={'stop-icon'}
 						onClick={() => onClick()}
@@ -30,4 +31,4 @@ const RecordButton = (props) => {
 	);
 };
 
-export default RecordButton;
+export default PlaybackControlButton;

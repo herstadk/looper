@@ -46,8 +46,8 @@ const getAllBlobs = async () => {
 
 const getBlob = async (blobName) => {
     let mediaBlob = await fetch((azureStorageURL + blobName)).then(res => res.blob());
-    let mediaBlobURL = window.URL.createObjectURL(mediaBlob);
-    return { mediaBlobURL, mediaBlob, saved: true };
+    let mediaBlobUrl = window.URL.createObjectURL(mediaBlob);
+    return { mediaBlobUrl, saved: true };
 };
 
 const postBlob = async (blob, name) => {
@@ -66,7 +66,7 @@ const postBlob = async (blob, name) => {
     await fetch(postURL, {
         method: 'PUT',
         headers: blobHeaders,
-        body: blob.mediaBlob
+        body: blob
     })
     .then(res => {
         if (res.ok) {

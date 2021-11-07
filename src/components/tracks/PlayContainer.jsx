@@ -34,7 +34,7 @@ const PlayContainer = () => {
             fontSize: 48,
             }}>
             
-            <PlayButton onClick = {PlayAudio} playState = {state.dataPlaying}/>
+            <PlayButton /*onClick = {PlayAudio} playState = {state.dataPlaying}*/ />
             </div>
             <div>
                 max loop
