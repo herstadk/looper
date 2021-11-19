@@ -10,14 +10,33 @@ const style = {
 };
 
 const RecordButton = (props) => {
-	const { onClick, isPlaying } = props;
+	const { onClick, isPlaying, stopPlayback, stopRecording } = props;
 
 	// to add an event listener
 	const innerRef = useRef(null);
 
+	// used to stop recording and all playback of audio
 	useEffect(() => {
 		const div = innerRef.current;
+		div.addEventListener('click', stopRecordAndPlay);
 
+		function stopRecordAndPlay() {
+			if (isPlaying) {
+				stopPlayback();
+				stopRecording();
+				div.style.visibility = 'visible';
+			}
+		}
+
+		return () => {
+			div.removeEventListener('click', stopRecordAndPlay);
+		}
+	});
+
+	// add flashing effect for the record button to let user
+	// know they are being recorded
+	useEffect(() => {
+		const div = innerRef.current;
 		div.addEventListener('click', flash);
 
 		async function flash() {

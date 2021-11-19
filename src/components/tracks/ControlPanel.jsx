@@ -70,7 +70,11 @@ const ControlPanel = (props) => {
 
 	return (
 		<div style={controlPanelStyle}>
-			<RecordButton audioContext={audioContext} onClick={handleRecordingStart} isPlaying={isPlaying} />
+			<RecordButton audioContext={audioContext} 
+						  onClick={handleRecordingStart} 
+						  isPlaying={isPlaying}
+						  stopPlayback={stopPlayback}
+						  stopRecording={stopLoopRecording} />
 			<SaveButton mediaBlobUrls={mediaBlobUrls} />
 			<LoopControlRow />
 		</div>
