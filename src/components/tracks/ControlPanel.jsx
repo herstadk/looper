@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
@@ -15,7 +15,7 @@ const controlPanelStyle = {
 };
 
 const ControlPanel = (props) => {
-	const { audioContext, addMediaBlobUrl, mediaBlobUrls, playAudio, isPlaying, setIsPlaying, audioSource } = props;
+	const { audioContext, addMediaBlobUrl, mediaBlobUrls, playAudio, isPlaying, /*setIsPlaying,*/ audioSource } = props;
 	const { restart } = useTimer({onExpire: () => stopLoopRecording()})
 	const duration = 5;
 	const { status, startRecording, stopRecording } = useReactMediaRecorder({

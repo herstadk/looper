@@ -10,7 +10,7 @@ async function saveSession(blobs) {
     };
 
     let tracks = []
-    for (let blob of blobs) {
+    for (let i = 0; i < blobs.length; i++) {
         let trackName = prompt('Name your track: ');
         tracks.push({ TrackName: trackName });
     }

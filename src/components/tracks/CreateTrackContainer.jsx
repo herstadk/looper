@@ -135,7 +135,7 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 	// Note: audio elements are included here for proof of concept only
 	return (
 		<div style={containerStyle}>
-			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioSource={audioSource} />
+			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} /*setIsPlaying={setIsPlaying}*/ audioSource={audioSource} />
 			<div style={titleDivStyle}>{title}</div>
 			<PlayContainer />
 		</div>
