@@ -84,6 +84,9 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 	};
 
 	const playAudio = () => {
+		if (mediaBlobUrls.length === 0) {
+			return;		// don't attempt to play without any audio elements loaded
+		}
 		if (audioSource) {
 			audioSource.disconnect();
 			setAudioSource(null);
