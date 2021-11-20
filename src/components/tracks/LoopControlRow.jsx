@@ -15,17 +15,16 @@ const rowStyle = {
   justifyContent: 'space-around', 
 }
 
-const LoopControlRow = (props) => {
-  const { handleLoopStart } = props;
+const LoopControlRow = () => {
 
   return (
     <div style={rowContainerStyle}>
       <div style={rowStyle}>
-        <StartLoopButton onClick={handleLoopStart} />
-        <StartLoopButton onClick={handleLoopStart} />
-        <StartLoopButton onClick={handleLoopStart} />
-        <StartLoopButton onClick={handleLoopStart} />
-        <StartLoopButton onClick={handleLoopStart} />
+        <StartLoopButton />
+        <StartLoopButton />
+        <StartLoopButton />
+        <StartLoopButton />
+        <StartLoopButton />
       </div>
     </div>
   );
