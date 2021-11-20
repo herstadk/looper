@@ -9,18 +9,18 @@ const PlayContainer = () => {
         dataPlaying: false
     }
 
-    const PlayAudio = () => {
-        console.log("Playing audio from function")
-        if (state.dataPlaying === false){
-            console.log("Play");
-            state.audio.play();
-            state.dataPlaying = true;
-        } else {
-            console.log("Pause");
-            state.audio.pause();
-            state.dataPlaying = false;
-        }   
-    }
+    // const PlayAudio = () => {
+    //     console.log("Playing audio from function")
+    //     if (state.dataPlaying === false){
+    //         console.log("Play");
+    //         state.audio.play();
+    //         state.dataPlaying = true;
+    //     } else {
+    //         console.log("Pause");
+    //         state.audio.pause();
+    //         state.dataPlaying = false;
+    //     }   
+    // }
 
     return (
         <div

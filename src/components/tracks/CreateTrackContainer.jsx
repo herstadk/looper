@@ -84,6 +84,9 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 	};
 
 	const playAudio = () => {
+		if (mediaBlobUrls.length === 0) {
+			return;		// don't attempt to play without any audio elements loaded
+		}
 		if (audioSource) {
 			audioSource.disconnect();
 			setAudioSource(null);
@@ -132,7 +135,7 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 	// Note: audio elements are included here for proof of concept only
 	return (
 		<div style={containerStyle}>
-			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioSource={audioSource} />
+			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} /*setIsPlaying={setIsPlaying}*/ audioSource={audioSource} />
 			<div style={titleDivStyle}>{title}</div>
 			<PlayContainer />
 		</div>

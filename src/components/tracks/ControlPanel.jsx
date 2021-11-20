@@ -3,7 +3,7 @@ import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
 import { useReactMediaRecorder } from 'react-media-recorder';
-import PlaybackControlButton from './PlaybackControlButton';
+import RecordButton from './RecordButton';
 import { useTimer } from 'react-timer-hook';
 
 const controlPanelStyle = {
@@ -15,9 +15,9 @@ const controlPanelStyle = {
 };
 
 const ControlPanel = (props) => {
-	const { audioContext, addMediaBlobUrl, mediaBlobUrls, playAudio, isPlaying, setIsPlaying, audioSource } = props;
+	const { audioContext, addMediaBlobUrl, mediaBlobUrls, playAudio, isPlaying, /*setIsPlaying,*/ audioSource } = props;
 	const { restart } = useTimer({onExpire: () => stopLoopRecording()})
-	const duration = 3;
+	const duration = 5;
 	const { status, startRecording, stopRecording } = useReactMediaRecorder({
 		video: false,
 		audio: true,
@@ -47,19 +47,20 @@ const ControlPanel = (props) => {
 	}
 
   const handleRecordingStart = () => {
-    if (status === 'idle' || status === 'stopped') {
-      startLoopRecording();
-    } else if (status === 'permission_denied') {
-      console.log('Permission denied');
-    } else {
-      console.log('Something went wrong');
-    }
+		if (status === 'idle' || status === 'stopped') {
+			handlePlaybackStart();
+			startLoopRecording();
+		} else if (status === 'permission_denied') {
+			console.log('Permission denied');
+		} else {
+			console.log('Something went wrong');
+		}
   }
 
 	const handlePlaybackStart = () => {
 		if (status === 'recording') {
-      return;
-    }
+			return;
+		}
 		if (isPlaying) {
 			stopPlayback();
 		} else {
@@ -69,9 +70,13 @@ const ControlPanel = (props) => {
 
 	return (
 		<div style={controlPanelStyle}>
-			<PlaybackControlButton audioContext={audioContext} onClick={handlePlaybackStart} isPlaying={isPlaying} />
+			<RecordButton audioContext={audioContext} 
+						  onClick={handleRecordingStart} 
+						  isPlaying={isPlaying}
+						  stopPlayback={stopPlayback}
+						  stopRecording={stopLoopRecording} />
 			<SaveButton mediaBlobUrls={mediaBlobUrls} />
-			<LoopControlRow handleLoopStart={handleRecordingStart}/>
+			<LoopControlRow />
 		</div>
 	);
 };
