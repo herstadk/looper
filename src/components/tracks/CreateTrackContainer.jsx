@@ -6,233 +6,274 @@ import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
 
 const containerStyle = {
-	height: '100%',
-	width: '100%',
-	display: 'flex',
-	flexFlow: 'column',
-	justifyContent: 'center',
-	alignItems: 'center'
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  flexFlow: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
 };
 
 const initialState = {
-	initiatingCountdown: false,
-	recording: false,
-	countingDown: false,
-	playingAudio: false,
-	expiryTimestamp: undefined
-}
+  initiatingCountdown: false,
+  recording: false,
+  countingDown: false,
+  playingAudio: false,
+  expiryTimestamp: undefined,
+};
 
 const reducer = (state, action) => {
-	switch (action.type) {
-		case 'RECORDING_STARTED':
-			console.log('recording started');
-			return {...state, recording: true, playingAudio: true, countingDown: false, expiryTimestamp: action.payload.expiryTimestamp};
-		case 'RECORDING_ENDED':
-			console.log('recording ended');
-			return {...state, recording: false, playingAudio: false, expiryTimestamp: undefined};
-		case 'COUNTDOWN_STARTED':
-			console.log('countdown started');
-			return {...state, countingDown: true, expiryTimestamp: action.payload.expiryTimestamp};
-		case 'COUNTDOWN_ENDED':
-			console.log('countdown ended');
-			return {...state, countingDown: false, expiryTimestamp: undefined};
-		default:
-			return initialState;
-	}
-}
+  switch (action.type) {
+    case 'RECORDING_STARTED':
+      console.log('recording started');
+      return {
+        ...state,
+        recording: true,
+        playingAudio: true,
+        countingDown: false,
+        expiryTimestamp: action.payload.expiryTimestamp,
+      };
+    case 'RECORDING_ENDED':
+      console.log('recording ended');
+      return {
+        ...state,
+        recording: false,
+        playingAudio: false,
+        expiryTimestamp: undefined,
+      };
+    case 'COUNTDOWN_STARTED':
+      console.log('countdown started');
+      return {
+        ...state,
+        countingDown: true,
+        expiryTimestamp: action.payload.expiryTimestamp,
+      };
+    case 'COUNTDOWN_ENDED':
+      console.log('countdown ended');
+      return { ...state, countingDown: false, expiryTimestamp: undefined };
+    default:
+      return initialState;
+  }
+};
 
 const CreateTrackContainer = (props) => {
-	const { audioContext } = props;
-	const [state, dispatch] = useReducer(reducer, initialState);
-	const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
-	const [audioBuffers, setAudioBuffers] = useState([]);
-	const [audioSource, setAudioSource] = useState(undefined);
-	const [bpm, setBpm] = useState(120);
-	const [beatsPerBar, setBeatsPerBar] = useState(4);
-	const [maxBarsPerLoop, setMaxBarsPerLoop] = useState(4);
-	const [barsPerLoop, setBarsPerLoop ] = useState(undefined);
-	const { status, startRecording, stopRecording } = useReactMediaRecorder({
-		video: false,
-		audio: true,
-		blobOptions: { type: 'audio/mpeg' },
-		onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
-	});
+  const { audioContext } = props;
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
+  const [audioBuffers, setAudioBuffers] = useState([]);
+  const [audioSource, setAudioSource] = useState(undefined);
+  const [bpm, setBpm] = useState(120);
+  const [beatsPerBar, setBeatsPerBar] = useState(4);
+  const [maxBarsPerLoop, setMaxBarsPerLoop] = useState(4);
+  const [barsPerLoop, setBarsPerLoop] = useState(undefined);
+  const { status, startRecording, stopRecording } = useReactMediaRecorder({
+    video: false,
+    audio: true,
+    blobOptions: { type: 'audio/mpeg' },
+    onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
+  });
 
-	const loadAudioBuffer = useCallback((mediaBlobUrl) => {
-		const request = new XMLHttpRequest();
-		request.open("GET", mediaBlobUrl);
-		request.responseType = "arraybuffer";
-		request.onload = () => {
-			const undecodedAudio = request.response;
-			audioContext.decodeAudioData(undecodedAudio, (audioBuffer) => addAudioBuffer(audioBuffer));
-		};
+  const getSecPerBeat = () => {
+    return 1 / (bpm / 60);
+  };
 
-		request.send();
-	}, [audioContext])
+  const getFullDuration = () => {
+    return maxBarsPerLoop * beatsPerBar * getSecPerBeat();
+  };
 
-	const loadFetchedAudioBuffers = useCallback((allBlobs) => {
-		for (const blob of allBlobs) {
-			loadAudioBuffer(blob.mediaBlobUrl);
-		}
-	}, [loadAudioBuffer])
+  const loadAudioBuffer = useCallback(
+    (mediaBlobUrl) => {
+      const request = new XMLHttpRequest();
+      request.open('GET', mediaBlobUrl);
+      request.responseType = 'arraybuffer';
+      request.onload = () => {
+        const undecodedAudio = request.response;
+        audioContext.decodeAudioData(undecodedAudio, (audioBuffer) =>
+          addAudioBuffer(audioBuffer)
+        );
+      };
 
-	useEffect(() => {
-		/**
-		 * 
-		 * 
-		 * Testing get requests from azure
-		 * 
-		 * 
-		 */
-		async function myfunc() {
-			let allBlobs = await getAllBlobs();
-			loadFetchedAudioBuffers(allBlobs);
-			setMediaBlobUrls([...allBlobs]);
-		}
-		myfunc();
-		/**
-		 * 
-		 * 
-		 * 
-		 * End testing get requests
-		 * 
-		 * 
-		 * 
-		 */
-	}, [loadFetchedAudioBuffers]);
+      request.send();
+    },
+    [audioContext]
+  );
 
-	const addMediaBlobUrl = (newMediaBlobUrl) => {
-		newMediaBlobUrl.saved = false;
-		setMediaBlobUrls((curMediaBlobUrls) => [
-			...curMediaBlobUrls,
-			newMediaBlobUrl,
-		]);
-		loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
-	};
+  const loadFetchedAudioBuffers = useCallback(
+    (allBlobs) => {
+      for (const blob of allBlobs) {
+        loadAudioBuffer(blob.mediaBlobUrl);
+      }
+    },
+    [loadAudioBuffer]
+  );
 
-	const addAudioBuffer = (newAudioBuffer) => {
-		setAudioBuffers((curAudioBuffers) => [
-			...curAudioBuffers,
-			newAudioBuffer,
-		]);
-	};
+  useEffect(() => {
+    /**
+     *
+     *
+     * Testing get requests from azure
+     *
+     *
+     */
+    async function myfunc() {
+      let allBlobs = await getAllBlobs();
+      loadFetchedAudioBuffers(allBlobs);
+      setMediaBlobUrls([...allBlobs]);
+    }
+    myfunc();
+    /**
+     *
+     *
+     *
+     * End testing get requests
+     *
+     *
+     *
+     */
+  }, [loadFetchedAudioBuffers]);
 
-	const playAudio = () => {
-		if (mediaBlobUrls.length === 0) {
-			return;		// don't attempt to play without any audio elements loaded
-		}
-		if (audioSource) {
-			audioSource.disconnect();
-			setAudioSource(undefined);
-		}
-		const source = audioContext.createBufferSource()
-		setAudioSource(source);
-		source.connect(audioContext.destination);
-		source.buffer = mixAudioBuffers(audioBuffers);
-		// source.addEventListener('ended', () => setIsPlaying(false));
-		audioContext.resume();
-		// setIsPlaying(true);
-		source.start();
-	};
+  const addMediaBlobUrl = (newMediaBlobUrl) => {
+    newMediaBlobUrl.saved = false;
+    setMediaBlobUrls((curMediaBlobUrls) => [
+      ...curMediaBlobUrls,
+      newMediaBlobUrl,
+    ]);
+    loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
+  };
 
-	const mixAudioBuffers = (audioBuffers) => {
-		const numChannels = getMinNumChannels(audioBuffers);
-		const length = getMaxTrackLength(audioBuffers);
-		const mix = audioContext.createBuffer(numChannels, length, audioContext.sampleRate);
-		for (const audioBuffer of audioBuffers) {
-			// Mix sound channels seperately
-			for (let channel = 0; channel < numChannels; channel++) {
-				const mixChannelBuffer = mix.getChannelData(channel);
-				const audioChannelBuffer = audioBuffer.getChannelData(channel);
-				let totalBytes = 0;
-				// Loop all but the longest track
-				while (totalBytes < length) {
-					// Sum audio byte by byte
-					for (let byte = 0; byte < audioBuffer.length; byte++) {
-						mixChannelBuffer[totalBytes] += audioChannelBuffer[byte];
-						totalBytes += 1;
-					}
-				}
-			}
-		}
+  const addAudioBuffer = (newAudioBuffer) => {
+    setAudioBuffers((curAudioBuffers) => [...curAudioBuffers, newAudioBuffer]);
+  };
 
-		return mix;
-	}
+  const playAudio = () => {
+    if (mediaBlobUrls.length === 0) {
+      return; // don't attempt to play without any audio elements loaded
+    }
+    if (audioSource) {
+      audioSource.disconnect();
+      setAudioSource(undefined);
+    }
+    const source = audioContext.createBufferSource();
+    setAudioSource(source);
+    source.connect(audioContext.destination);
+    source.buffer = mixAudioBuffers(audioBuffers);
+    // source.addEventListener('ended', () => setIsPlaying(false));
+    audioContext.resume();
+    // setIsPlaying(true);
+    source.start();
+  };
 
-	const getMinNumChannels = (audioBuffers) => {
-		return Math.min(...audioBuffers.map(x => x.numberOfChannels));
-	}
+  const mixAudioBuffers = (audioBuffers) => {
+    const numChannels = getMinNumChannels(audioBuffers);
+    const length = getMaxTrackLength(audioBuffers);
+    const mix = audioContext.createBuffer(
+      numChannels,
+      length,
+      audioContext.sampleRate
+    );
+    for (const audioBuffer of audioBuffers) {
+      // Mix sound channels seperately
+      for (let channel = 0; channel < numChannels; channel++) {
+        const mixChannelBuffer = mix.getChannelData(channel);
+        const audioChannelBuffer = audioBuffer.getChannelData(channel);
+        let totalBytes = 0;
+        // Loop all but the longest track
+        while (totalBytes < length) {
+          // Sum audio byte by byte
+          for (let byte = 0; byte < audioBuffer.length; byte++) {
+            mixChannelBuffer[totalBytes] += audioChannelBuffer[byte];
+            totalBytes += 1;
+          }
+        }
+      }
+    }
 
-	const getMaxTrackLength = (audioBuffers) => {
-		return Math.max(...audioBuffers.map(x => x.length));
-	}
+    return mix;
+  };
 
-	const startCountdown = () => {
-		const time = setTimer(3);
-		return time;
-	}
+  const getMinNumChannels = (audioBuffers) => {
+    return Math.min(...audioBuffers.map((x) => x.numberOfChannels));
+  };
 
-	const onCountdownFinished = () => {
-		playAudio();
-		const time = startLoopRecording();
-		dispatch({type: 'RECORDING_STARTED', payload: {expiryTimestamp: time}});
-	}
+  const getMaxTrackLength = (audioBuffers) => {
+    return Math.max(...audioBuffers.map((x) => x.length));
+  };
 
-	const onRecordingFinished = () => {
-		stopLoopRecording();
-		dispatch({type: 'RECORDING_ENDED'})
-	}
+  const startCountdown = () => {
+    const time = setTimer(3);
+    return time;
+  };
 
-	const stopLoopRecording = () => {
-		stopRecording();
-		stopPlayback();
-	}
+  const onCountdownFinished = () => {
+    playAudio();
+    const time = startLoopRecording();
+    dispatch({ type: 'RECORDING_STARTED', payload: { expiryTimestamp: time } });
+  };
 
-	const setTimer = (duration) => {
-		const time = new Date();
-		time.setSeconds(time.getSeconds() + duration);  
-		return time;
-	}
+  const onRecordingFinished = () => {
+    stopLoopRecording();
+    dispatch({ type: 'RECORDING_ENDED' });
+  };
 
-	const startLoopRecording = () => {
-		const secPerBeat = 1 / (bpm / 60);
-		const duration = barsPerLoop * beatsPerBar * secPerBeat;
-		const time = setTimer(duration);  
-		startRecording();
-		return time;
-	}
+  const stopLoopRecording = () => {
+    stopRecording();
+    stopPlayback();
+  };
 
-	const stopPlayback = () => {
-		audioSource?.stop();
-	}
+  const setTimer = (duration) => {
+    const time = new Date();
+    time.setSeconds(time.getSeconds() + duration);
+    return time;
+  };
+
+  const startLoopRecording = () => {
+    const duration = barsPerLoop * beatsPerBar * getSecPerBeat();
+    const time = setTimer(duration);
+    startRecording();
+    return time;
+  };
+
+  const stopPlayback = () => {
+    audioSource?.stop();
+  };
 
   const handleStartRecording = (numBars) => {
-		if (state.recording || state.countingDown || state.playingAudio) {
-			return;
-		}
+    if (state.recording || state.countingDown || state.playingAudio) {
+      return;
+    }
 
-		if (status === 'permission_denied') {
-			console.log('Permission denied');
-			return;
-		}
-		setBarsPerLoop(numBars);
-		const time = startCountdown();
-		dispatch({type: 'COUNTDOWN_STARTED', payload: {expiryTimestamp: time}});
-  }
+    if (status === 'permission_denied') {
+      console.log('Permission denied');
+      return;
+    }
+    setBarsPerLoop(numBars);
+    const time = startCountdown();
+    dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
+  };
 
-	return (
-		<div style={containerStyle}>
-			{state.recording ? <Timer onExpire={onRecordingFinished} expiryTimestamp={state.expiryTimestamp} /> : undefined}
-			<ControlPanel
-				state={state}
-				mediaBlobUrls={mediaBlobUrls}
-				handleStartRecording={handleStartRecording}
-				stopPlayback={stopPlayback}
-				stopRecording={stopLoopRecording}
-			/>
-			<PlayContainer tracks={audioBuffers} state={state} onCountdownFinished={onCountdownFinished} />
-		</div>
-	);
+  return (
+    <div style={containerStyle}>
+      {state.recording ? (
+        <Timer
+          onExpire={onRecordingFinished}
+          expiryTimestamp={state.expiryTimestamp}
+        />
+      ) : undefined}
+      <ControlPanel
+        state={state}
+        mediaBlobUrls={mediaBlobUrls}
+        handleStartRecording={handleStartRecording}
+        stopPlayback={stopPlayback}
+        stopRecording={stopLoopRecording}
+      />
+      <PlayContainer
+        tracks={audioBuffers}
+        state={state}
+        onCountdownFinished={onCountdownFinished}
+        duration={getFullDuration()}
+      />
+    </div>
+  );
 };
 
 export default CreateTrackContainer;

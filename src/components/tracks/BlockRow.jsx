@@ -3,11 +3,11 @@ import Block from './Block';
 
 const rowStyle = {
   display: 'flex',
-  width: '100%',
-  height: '20%',
-  borderRadius: '5px',
+  width: '1200px',
+  height: '100px',
+  borderRadius: '2px',
   overflow: 'hidden',
-}
+};
 
 const BlockRow = (props) => {
   const { color, inProgress, state, onCountdownFinished } = props;
@@ -15,19 +15,19 @@ const BlockRow = (props) => {
   return (
     <div style={rowStyle}>
       {loops.map((loop, idx) => {
-        
-        return <Block
-          state={state} 
-          onCountdownFinished={onCountdownFinished} 
-          inProgress={inProgress} 
-          color={color} 
-          loopIndex={idx} 
-          key={idx} 
-          progress={0} 
-        />
+        return (
+          <Block
+            state={state}
+            onCountdownFinished={onCountdownFinished}
+            inProgress={inProgress}
+            color={color}
+            loopIndex={idx}
+            key={idx}
+          />
+        );
       })}
     </div>
   );
-}
+};
 
 export default BlockRow;
