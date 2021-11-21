@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
-import { Colors } from '../../styles/colors';
 import PlayContainer from './PlayContainer';
 import { getAllBlobs } from '../../utils/blobs';
 
@@ -9,14 +8,8 @@ const containerStyle = {
 	width: '100%',
 	display: 'flex',
 	flexFlow: 'column',
-};
-
-const titleDivStyle = {
-	color: Colors.white,
-	fontSize: 64,
-	width: '100%',
-	display: 'flex',
 	justifyContent: 'center',
+	alignItems: 'center'
 };
 
 const CreateTrackContainer = ({ title, audioContext }) => {
@@ -33,6 +26,7 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 			const undecodedAudio = request.response;
 			audioContext.decodeAudioData(undecodedAudio, (audioBuffer) => addAudioBuffer(audioBuffer));
 		};
+
 		request.send();
 	}, [audioContext])
 
@@ -42,30 +36,30 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		}
 	}, [loadAudioBuffer])
 
-	useEffect(() => {
-		/**
-		 * 
-		 * 
-		 * Testing get requests from azure
-		 * 
-		 * 
-		 */
-		async function myfunc() {
-			let allBlobs = await getAllBlobs();
-			loadFetchedAudioBuffers(allBlobs);
-			setMediaBlobUrls([...allBlobs]);
-		}
-		myfunc();
-		/**
-		 * 
-		 * 
-		 * 
-		 * End testing get requests
-		 * 
-		 * 
-		 * 
-		 */
-	}, [loadFetchedAudioBuffers]);
+	// useEffect(() => {
+	// 	/**
+	// 	 * 
+	// 	 * 
+	// 	 * Testing get requests from azure
+	// 	 * 
+	// 	 * 
+	// 	 */
+	// 	async function myfunc() {
+	// 		let allBlobs = await getAllBlobs();
+	// 		loadFetchedAudioBuffers(allBlobs);
+	// 		setMediaBlobUrls([...allBlobs]);
+	// 	}
+	// 	myfunc();
+	// 	/**
+	// 	 * 
+	// 	 * 
+	// 	 * 
+	// 	 * End testing get requests
+	// 	 * 
+	// 	 * 
+	// 	 * 
+	// 	 */
+	// }, [loadFetchedAudioBuffers]);
 
 	const addMediaBlobUrl = (newMediaBlobUrl) => {
 		newMediaBlobUrl.saved = false;
@@ -121,6 +115,7 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 				}
 			}
 		}
+
 		return mix;
 	}
 
@@ -132,18 +127,20 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		return Math.max(...audioBuffers.map(x => x.length));
 	}
 
-	// Note: audio elements are included here for proof of concept only
 	return (
 		<div style={containerStyle}>
-			<ControlPanel audioContext={audioContext} addMediaBlobUrl={addMediaBlobUrl} mediaBlobUrls={mediaBlobUrls} playAudio={playAudio} isPlaying={isPlaying} /*setIsPlaying={setIsPlaying}*/ audioSource={audioSource} />
-			<div style={titleDivStyle}>{title}</div>
-			<PlayContainer />
+			<ControlPanel
+				audioContext={audioContext}
+				addMediaBlobUrl={addMediaBlobUrl}
+				mediaBlobUrls={mediaBlobUrls}
+				playAudio={playAudio}
+				isPlaying={isPlaying}
+				setIsPlaying={setIsPlaying}
+				audioSource={audioSource} 
+			/>
+			<PlayContainer tracks={audioBuffers}/>
 		</div>
 	);
-};
-
-CreateTrackContainer.defaultProps = {
-	title: 'Create Track',
 };
 
 export default CreateTrackContainer;

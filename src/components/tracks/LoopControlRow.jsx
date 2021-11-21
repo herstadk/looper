@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import StartLoopButton from './StartLoopButton';
 
 const rowContainerStyle = {
@@ -15,16 +15,14 @@ const rowStyle = {
   justifyContent: 'space-around', 
 }
 
-const LoopControlRow = () => {
+const LoopControlRow = (props) => {
+  const { initializeRecording } = props;
+  const barCountOptions = [1, 2, 4, 8];
 
   return (
     <div style={rowContainerStyle}>
       <div style={rowStyle}>
-        <StartLoopButton />
-        <StartLoopButton />
-        <StartLoopButton />
-        <StartLoopButton />
-        <StartLoopButton />
+        {barCountOptions.map(bco => <StartLoopButton number={bco} onClick={() => initializeRecording(bco)} key={bco} />)}
       </div>
     </div>
   );
