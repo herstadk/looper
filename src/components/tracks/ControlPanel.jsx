@@ -13,16 +13,15 @@ const controlPanelStyle = {
 };
 
 const ControlPanel = (props) => {
-	const { mediaBlobUrls, handleStartRecording } = props;
+	const { state, stopPlayback, stopRecording, mediaBlobUrls, handleStartRecording } = props;
 
 	return (
 		<div style={controlPanelStyle}>
-			{/* <RecordButton 
-				audioContext={audioContext} 
-				onClick={handleStartRecording} 
-				isPlaying={isPlaying}
+			<RecordButton 
+				state={state}
+				onClick={handleStartRecording}
 				stopPlayback={stopPlayback}
-				stopRecording={stopLoopRecording} /> */}
+				stopRecording={stopRecording} />
 			<SaveButton mediaBlobUrls={mediaBlobUrls} />
 			<LoopControlRow initializeRecording={numBars => handleStartRecording(numBars)} />
 		</div>

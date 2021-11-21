@@ -14,7 +14,18 @@ const BlockRow = (props) => {
   const loops = [1];
   return (
     <div style={rowStyle}>
-      {loops.map((loop, idx) => <Block state={state} onCountdownFinished={onCountdownFinished} inProgress={inProgress} color={color} loop={loop} loopIndex={idx} key={idx} progress={0} />)}
+      {loops.map((loop, idx) => {
+        
+        return <Block
+          state={state} 
+          onCountdownFinished={onCountdownFinished} 
+          inProgress={inProgress} 
+          color={color} 
+          loopIndex={idx} 
+          key={idx} 
+          progress={0} 
+        />
+      })}
     </div>
   );
 }

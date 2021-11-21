@@ -46,10 +46,11 @@ const CreateTrackContainer = (props) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
 	const [audioBuffers, setAudioBuffers] = useState([]);
-	const [audioSource, setAudioSource] = useState(null);
-	const bpm = 120;
-	const beatsPerBar = 4;
-	const [numBars, setNumBars ] = useState(undefined);
+	const [audioSource, setAudioSource] = useState(undefined);
+	const [bpm, setBpm] = useState(120);
+	const [beatsPerBar, setBeatsPerBar] = useState(4);
+	const [maxBarsPerLoop, setMaxBarsPerLoop] = useState(4);
+	const [barsPerLoop, setBarsPerLoop ] = useState(undefined);
 	const { status, startRecording, stopRecording } = useReactMediaRecorder({
 		video: false,
 		audio: true,
@@ -69,36 +70,36 @@ const CreateTrackContainer = (props) => {
 		request.send();
 	}, [audioContext])
 
-	// const loadFetchedAudioBuffers = useCallback((allBlobs) => {
-	// 	for (const blob of allBlobs) {
-	// 		loadAudioBuffer(blob.mediaBlobUrl);
-	// 	}
-	// }, [loadAudioBuffer])
+	const loadFetchedAudioBuffers = useCallback((allBlobs) => {
+		for (const blob of allBlobs) {
+			loadAudioBuffer(blob.mediaBlobUrl);
+		}
+	}, [loadAudioBuffer])
 
-	// useEffect(() => {
-	// 	/**
-	// 	 * 
-	// 	 * 
-	// 	 * Testing get requests from azure
-	// 	 * 
-	// 	 * 
-	// 	 */
-	// 	async function myfunc() {
-	// 		let allBlobs = await getAllBlobs();
-	// 		loadFetchedAudioBuffers(allBlobs);
-	// 		setMediaBlobUrls([...allBlobs]);
-	// 	}
-	// 	myfunc();
-	// 	/**
-	// 	 * 
-	// 	 * 
-	// 	 * 
-	// 	 * End testing get requests
-	// 	 * 
-	// 	 * 
-	// 	 * 
-	// 	 */
-	// }, [loadFetchedAudioBuffers]);
+	useEffect(() => {
+		/**
+		 * 
+		 * 
+		 * Testing get requests from azure
+		 * 
+		 * 
+		 */
+		async function myfunc() {
+			let allBlobs = await getAllBlobs();
+			loadFetchedAudioBuffers(allBlobs);
+			setMediaBlobUrls([...allBlobs]);
+		}
+		myfunc();
+		/**
+		 * 
+		 * 
+		 * 
+		 * End testing get requests
+		 * 
+		 * 
+		 * 
+		 */
+	}, [loadFetchedAudioBuffers]);
 
 	const addMediaBlobUrl = (newMediaBlobUrl) => {
 		newMediaBlobUrl.saved = false;
@@ -122,7 +123,7 @@ const CreateTrackContainer = (props) => {
 		}
 		if (audioSource) {
 			audioSource.disconnect();
-			setAudioSource(null);
+			setAudioSource(undefined);
 		}
 		const source = audioContext.createBufferSource()
 		setAudioSource(source);
@@ -172,8 +173,8 @@ const CreateTrackContainer = (props) => {
 	}
 
 	const onCountdownFinished = () => {
-		const time = startLoopRecording();
 		playAudio();
+		const time = startLoopRecording();
 		dispatch({type: 'RECORDING_STARTED', payload: {expiryTimestamp: time}});
 	}
 
@@ -195,7 +196,7 @@ const CreateTrackContainer = (props) => {
 
 	const startLoopRecording = () => {
 		const secPerBeat = 1 / (bpm / 60);
-		const duration = numBars * beatsPerBar * secPerBeat;
+		const duration = barsPerLoop * beatsPerBar * secPerBeat;
 		const time = setTimer(duration);  
 		startRecording();
 		return time;
@@ -214,7 +215,7 @@ const CreateTrackContainer = (props) => {
 			console.log('Permission denied');
 			return;
 		}
-		setNumBars(numBars);
+		setBarsPerLoop(numBars);
 		const time = startCountdown();
 		dispatch({type: 'COUNTDOWN_STARTED', payload: {expiryTimestamp: time}});
   }
@@ -223,8 +224,11 @@ const CreateTrackContainer = (props) => {
 		<div style={containerStyle}>
 			{state.recording ? <Timer onExpire={onRecordingFinished} expiryTimestamp={state.expiryTimestamp} /> : undefined}
 			<ControlPanel
+				state={state}
 				mediaBlobUrls={mediaBlobUrls}
 				handleStartRecording={handleStartRecording}
+				stopPlayback={stopPlayback}
+				stopRecording={stopLoopRecording}
 			/>
 			<PlayContainer tracks={audioBuffers} state={state} onCountdownFinished={onCountdownFinished} />
 		</div>
