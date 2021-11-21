@@ -11,11 +11,11 @@ const containerStyle = {
 }
 
 const PlayContainer = (props) => {
-  const { tracks } = props;
+  const { tracks, state, onCountdownFinished } = props;
 
   return (
     <div style={containerStyle}>
-      <BlockContainer tracks={tracks} />
+      <BlockContainer tracks={tracks} state={state} onCountdownFinished={onCountdownFinished} />
     </div>
   );
 }

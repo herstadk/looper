@@ -17,11 +17,11 @@ const getBlockColor = (idx) => {
 }
 
 const BlockContainer = (props) => {
-  const { tracks, isRecordingInProgress } = props;
+  const { tracks, state, onCountdownFinished } = props;
   return (
     <div style={containerStyle}>
-      {tracks.map( (track, idx) => <BlockRow color={getBlockColor(idx)} track={track} key={idx} />)}
-      {isRecordingInProgress ? <BlockRow color={getBlockColor(tracks.length)} /> : undefined}
+      {tracks.map( (track, idx) => <BlockRow state={state} color={getBlockColor(idx)} track={track} key={idx} />)}
+      {state.recording || state.countingDown ? <BlockRow state={state} color={getBlockColor(tracks.length)} inProgress onCountdownFinished={onCountdownFinished} /> : undefined}
     </div>
   );
 }

@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import { getAllBlobs } from '../../utils/blobs';
+import { useReactMediaRecorder } from 'react-media-recorder';
+import Timer from './Timer';
 
 const containerStyle = {
 	height: '100%',
@@ -12,11 +14,48 @@ const containerStyle = {
 	alignItems: 'center'
 };
 
-const CreateTrackContainer = ({ title, audioContext }) => {
+const initialState = {
+	initiatingCountdown: false,
+	recording: false,
+	countingDown: false,
+	playingAudio: false,
+	expiryTimestamp: undefined
+}
+
+const reducer = (state, action) => {
+	switch (action.type) {
+		case 'RECORDING_STARTED':
+			console.log('recording started');
+			return {...state, recording: true, playingAudio: true, countingDown: false, expiryTimestamp: action.payload.expiryTimestamp};
+		case 'RECORDING_ENDED':
+			console.log('recording ended');
+			return {...state, recording: false, playingAudio: false, expiryTimestamp: undefined};
+		case 'COUNTDOWN_STARTED':
+			console.log('countdown started');
+			return {...state, countingDown: true, expiryTimestamp: action.payload.expiryTimestamp};
+		case 'COUNTDOWN_ENDED':
+			console.log('countdown ended');
+			return {...state, countingDown: false, expiryTimestamp: undefined};
+		default:
+			return initialState;
+	}
+}
+
+const CreateTrackContainer = (props) => {
+	const { audioContext } = props;
+	const [state, dispatch] = useReducer(reducer, initialState);
 	const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
 	const [audioBuffers, setAudioBuffers] = useState([]);
 	const [audioSource, setAudioSource] = useState(null);
-	const [isPlaying, setIsPlaying] = useState(false);
+	const bpm = 120;
+	const beatsPerBar = 4;
+	const [numBars, setNumBars ] = useState(undefined);
+	const { status, startRecording, stopRecording } = useReactMediaRecorder({
+		video: false,
+		audio: true,
+		blobOptions: { type: 'audio/mpeg' },
+		onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
+	});
 
 	const loadAudioBuffer = useCallback((mediaBlobUrl) => {
 		const request = new XMLHttpRequest();
@@ -30,11 +69,11 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		request.send();
 	}, [audioContext])
 
-	const loadFetchedAudioBuffers = useCallback((allBlobs) => {
-		for (const blob of allBlobs) {
-			loadAudioBuffer(blob.mediaBlobUrl);
-		}
-	}, [loadAudioBuffer])
+	// const loadFetchedAudioBuffers = useCallback((allBlobs) => {
+	// 	for (const blob of allBlobs) {
+	// 		loadAudioBuffer(blob.mediaBlobUrl);
+	// 	}
+	// }, [loadAudioBuffer])
 
 	// useEffect(() => {
 	// 	/**
@@ -89,9 +128,9 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		setAudioSource(source);
 		source.connect(audioContext.destination);
 		source.buffer = mixAudioBuffers(audioBuffers);
-		source.addEventListener('ended', () => setIsPlaying(false));
+		// source.addEventListener('ended', () => setIsPlaying(false));
 		audioContext.resume();
-		setIsPlaying(true);
+		// setIsPlaying(true);
 		source.start();
 	};
 
@@ -127,18 +166,67 @@ const CreateTrackContainer = ({ title, audioContext }) => {
 		return Math.max(...audioBuffers.map(x => x.length));
 	}
 
+	const startCountdown = () => {
+		const time = setTimer(3);
+		return time;
+	}
+
+	const onCountdownFinished = () => {
+		const time = startLoopRecording();
+		playAudio();
+		dispatch({type: 'RECORDING_STARTED', payload: {expiryTimestamp: time}});
+	}
+
+	const onRecordingFinished = () => {
+		stopLoopRecording();
+		dispatch({type: 'RECORDING_ENDED'})
+	}
+
+	const stopLoopRecording = () => {
+		stopRecording();
+		stopPlayback();
+	}
+
+	const setTimer = (duration) => {
+		const time = new Date();
+		time.setSeconds(time.getSeconds() + duration);  
+		return time;
+	}
+
+	const startLoopRecording = () => {
+		const secPerBeat = 1 / (bpm / 60);
+		const duration = numBars * beatsPerBar * secPerBeat;
+		const time = setTimer(duration);  
+		startRecording();
+		return time;
+	}
+
+	const stopPlayback = () => {
+		audioSource?.stop();
+	}
+
+  const handleStartRecording = (numBars) => {
+		if (state.recording || state.countingDown || state.playingAudio) {
+			return;
+		}
+
+		if (status === 'permission_denied') {
+			console.log('Permission denied');
+			return;
+		}
+		setNumBars(numBars);
+		const time = startCountdown();
+		dispatch({type: 'COUNTDOWN_STARTED', payload: {expiryTimestamp: time}});
+  }
+
 	return (
 		<div style={containerStyle}>
+			{state.recording ? <Timer onExpire={onRecordingFinished} expiryTimestamp={state.expiryTimestamp} /> : undefined}
 			<ControlPanel
-				audioContext={audioContext}
-				addMediaBlobUrl={addMediaBlobUrl}
 				mediaBlobUrls={mediaBlobUrls}
-				playAudio={playAudio}
-				isPlaying={isPlaying}
-				setIsPlaying={setIsPlaying}
-				audioSource={audioSource} 
+				handleStartRecording={handleStartRecording}
 			/>
-			<PlayContainer tracks={audioBuffers}/>
+			<PlayContainer tracks={audioBuffers} state={state} onCountdownFinished={onCountdownFinished} />
 		</div>
 	);
 };
