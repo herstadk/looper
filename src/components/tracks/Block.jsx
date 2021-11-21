@@ -1,6 +1,5 @@
 import React from 'react';
 import CountdownTimer from './CountdownTimer';
-import ProgressBar from './ProgressBar';
 
 const blockStyle = {
   display: 'flex',

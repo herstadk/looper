@@ -17,14 +17,13 @@ const ProgressBar = (props) => {
   const [transition, setTransition] = useState(undefined);
   useEffect(() => {
     if (state.recording) {
-      console.log(duration);
       setTransform(`translateX(${width}px)`);
       setTransition(`transform ${duration}s linear`);
     } else {
       setTransform(undefined);
       setTransition('transform 0s linear');
     }
-  }, [state]);
+  }, [state, duration, width]);
 
   return (
     <div

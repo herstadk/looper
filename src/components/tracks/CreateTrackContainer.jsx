@@ -25,7 +25,6 @@ const initialState = {
 const reducer = (state, action) => {
   switch (action.type) {
     case 'RECORDING_STARTED':
-      console.log('recording started');
       return {
         ...state,
         recording: true,
@@ -34,7 +33,6 @@ const reducer = (state, action) => {
         expiryTimestamp: action.payload.expiryTimestamp,
       };
     case 'RECORDING_ENDED':
-      console.log('recording ended');
       return {
         ...state,
         recording: false,
@@ -42,14 +40,12 @@ const reducer = (state, action) => {
         expiryTimestamp: undefined,
       };
     case 'COUNTDOWN_STARTED':
-      console.log('countdown started');
       return {
         ...state,
         countingDown: true,
         expiryTimestamp: action.payload.expiryTimestamp,
       };
     case 'COUNTDOWN_ENDED':
-      console.log('countdown ended');
       return { ...state, countingDown: false, expiryTimestamp: undefined };
     default:
       return initialState;
@@ -62,9 +58,9 @@ const CreateTrackContainer = (props) => {
   const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
   const [audioBuffers, setAudioBuffers] = useState([]);
   const [audioSource, setAudioSource] = useState(undefined);
-  const [bpm, setBpm] = useState(120);
-  const [beatsPerBar, setBeatsPerBar] = useState(4);
-  const [maxBarsPerLoop, setMaxBarsPerLoop] = useState(4);
+  const [bpm] = useState(120);
+  const [beatsPerBar] = useState(4);
+  const [maxBarsPerLoop] = useState(4);
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
