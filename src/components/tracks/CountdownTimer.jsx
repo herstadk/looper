@@ -8,7 +8,7 @@ const CountdownTimer = (props) => {
 
   return (
     <div style={{display: 'flex', fontSize: 80, color: Colors.white}}>
-      {seconds}
+      {seconds > 0 ? seconds : undefined}
     </div>
   );
 }
