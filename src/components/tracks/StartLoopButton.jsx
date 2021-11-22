@@ -1,19 +1,35 @@
 import React from 'react';
-import { IconContext } from 'react-icons';
-import { FaCircleNotch } from 'react-icons/fa';
 import { Colors } from '../../styles/colors';
 
-const startLoopButtonStyle = {
+const outerCircleStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '60px',
+  width: '60px',
+  borderRadius: '50%',
+  backgroundColor: Colors.green,
+  cursor: 'pointer'
+}
+
+const innerCircleStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '52px',
+  width: '52px',
+  borderRadius: '50%',
+  fontSize: 40,
   color: Colors.green,
-  size: 60,
+  backgroundColor: Colors.black
 }
 
 const StartLoopButton = (props) => {
-  const { onClick } = props;
+  const { onClick, number } = props;
   return (
-    <IconContext.Provider value={startLoopButtonStyle}>
-      <FaCircleNotch onClick={() => onClick()} style={{cursor: 'pointer'}}/>
-    </IconContext.Provider>
+    <div style={outerCircleStyle} onClick={onClick}>
+      <div style={innerCircleStyle}>{number}</div>
+    </div>
   );
 }
 
