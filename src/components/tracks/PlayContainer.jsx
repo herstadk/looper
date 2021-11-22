@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import BlockContainer from './BlockContainer';
 import PlayDropdown from './PlayDropDown';
 
@@ -29,7 +30,7 @@ const PlayContainer = (props) => {
         onCountdownFinished={onCountdownFinished}
         duration={duration}
       />
-      <PlayDropdown addMediaBlobUrl = {addMediaBlobUrl} childToParent={childToParent} />
+      <PlayDropdown childToParent={childToParent} />
     {getAudioSelection(chosenFile)}
     </div>
   );

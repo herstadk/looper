@@ -116,4 +116,4 @@ const postBlob = async (blob, name) => {
     });
 };
 
-export { getAllBlobs, getBlob, postBlob, getBlobNames, getBlobByChoice };
+export { getAllBlobs, getBlob, postBlob, getBlobNames };
