@@ -103,31 +103,6 @@ const CreateTrackContainer = (props) => {
     [loadAudioBuffer]
   );
 
-  useEffect(() => {
-    /**
-     *
-     *
-     * Testing get requests from azure
-     *
-     *
-     */
-    async function myfunc() {
-      let allBlobs = await getAllBlobs();
-      loadFetchedAudioBuffers(allBlobs);
-      setMediaBlobUrls([...allBlobs]);
-    }
-    myfunc();
-    /**
-     *
-     *
-     *
-     * End testing get requests
-     *
-     *
-     *
-     */
-  }, [loadFetchedAudioBuffers]);
-
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
     setMediaBlobUrls((curMediaBlobUrls) => [
