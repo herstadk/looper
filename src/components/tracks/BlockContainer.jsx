@@ -36,13 +36,13 @@ const BlockContainer = (props) => {
 
   return (
     <div style={outerContainerStyle}>
-      <ProgressBar
+      {/* <ProgressBar
         state={state}
         showProgress
         height={height}
         width={width}
         duration={duration}
-      />
+      /> */}
       <div style={innerContainerStyle} ref={ref}>
         {tracks.map((track, idx) => (
           <BlockRow

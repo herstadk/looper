@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { IconContext } from 'react-icons';
-// import { FaPlay, FaStop, BsRecordFill } from 'react-icons/fa';
-import { BsRecordFill } from 'react-icons/bs';
+import { FaPlay, FaStop, BsRecordFill } from 'react-icons/fa';
 import { Colors } from '../../styles/colors';
 
 
@@ -64,18 +63,9 @@ const RecordButton = (props) => {
 
 	return (
 		<div ref={innerRef} >
-			<IconContext.Provider value={{ color: Colors.red, size: 100, boxShadow: '0 0 3px #ff2200' }}>
-				{isPlaying ? (
-					<BsRecordFill
-						onClick={() => onClick()}
-						style={style}
-					/>
-				) : (
-					<BsRecordFill
-						onClick={() => onClick()}
-						style={style}
-					/>
-				)}
+			<IconContext.Provider value={{ color: Colors.green, size: 100, boxShadow: '0 0 3px #ff2200' }}>
+				<FaPlay />
+
 			</IconContext.Provider>
 		</div>
 	);

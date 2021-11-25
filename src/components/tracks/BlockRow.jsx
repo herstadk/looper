@@ -10,13 +10,14 @@ const rowStyle = {
 };
 
 const BlockRow = (props) => {
-  const { color, inProgress, state, onCountdownFinished } = props;
+  const { color, inProgress, state, track, onCountdownFinished } = props;
   const loops = [1];
   return (
     <div style={rowStyle}>
       {loops.map((loop, idx) => {
         return (
           <Block
+            track={track}
             state={state}
             onCountdownFinished={onCountdownFinished}
             inProgress={inProgress}

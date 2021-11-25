@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CountdownTimer from './CountdownTimer';
+import WaveFormSection from './WaveFormSection';
 
 const blockStyle = {
   display: 'flex',
@@ -11,7 +12,38 @@ const blockStyle = {
 };
 
 const Block = (props) => {
-  const { state, onCountdownFinished, loopIndex, color, inProgress } = props;
+  const { state, onCountdownFinished, loopIndex, track, color, inProgress } = props;
+  const [waveform, setWaveform] = useState(undefined);
+  const [max, setMax] = useState(undefined);
+  const [min, setMin] = useState(undefined);
+  
+  useEffect(() => {
+    const numBuckets = 300
+    const bucketSize = Math.floor(track.length / numBuckets);
+    const buckets = [];
+    const channelData = track.getChannelData(0);
+    for (let i = 0; i < numBuckets; i++) {
+      const start = i * bucketSize;
+      const end = start + bucketSize;
+      const avg = channelData.slice(start, end).reduce((a, b) => a + b) / bucketSize;
+      buckets.push(avg);
+    }
+    setWaveform(buckets);
+    setMax(Math.max(...buckets));
+    setMin(Math.min(...buckets));
+  }, [track]);
+  
+  // const getHeight = (val) => {
+  //   const maxDif = max - min;
+  //   return (100 * (max - val) / maxDif).toString() + '%'; 
+  // }
+
+  const getHeight = (val) => {
+    const adjustedMax = Math.max(Math.abs(min), Math.max(min));
+    return (100 * Math.abs(val) / adjustedMax).toString() + '%';
+  }
+
+
   return (
     <div style={{ ...blockStyle, backgroundColor: color }}>
       <div
@@ -29,6 +61,9 @@ const Block = (props) => {
             onExpire={onCountdownFinished}
           />
         ) : undefined}
+        <div style={{display: 'flex', height: '100%', width: '100%', gap: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+          {waveform?.map((bucket, idx) => <WaveFormSection height={getHeight(bucket)} key={idx} />)}
+        </div>
       </div>
     </div>
   );
