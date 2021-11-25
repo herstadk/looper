@@ -4,6 +4,8 @@ import PlayContainer from './PlayContainer';
 import { getAllBlobs } from '../../utils/blobs';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
+import * as Tone from 'tone';
+
 
 const containerStyle = {
   height: '100%',
@@ -61,6 +63,7 @@ const CreateTrackContainer = (props) => {
   const [bpm] = useState(120);
   const [beatsPerBar] = useState(4);
   const [maxBarsPerLoop] = useState(4);
+  const [player, setPlayer] = useState(null); // Tone.js player to play mixed audio buffer
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
@@ -128,6 +131,11 @@ const CreateTrackContainer = (props) => {
      */
   }, [loadFetchedAudioBuffers]);
 
+  // set audiocontext to what we are working with instead of default Tone.js context
+  useEffect(() => {
+    Tone.setContext(audioContext);
+  }, []);
+
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
     setMediaBlobUrls((curMediaBlobUrls) => [
@@ -145,18 +153,24 @@ const CreateTrackContainer = (props) => {
     if (mediaBlobUrls.length === 0) {
       return; // don't attempt to play without any audio elements loaded
     }
-    if (audioSource) {
-      audioSource.disconnect();
-      setAudioSource(undefined);
-    }
-    const source = audioContext.createBufferSource();
-    setAudioSource(source);
-    source.connect(audioContext.destination);
-    source.buffer = mixAudioBuffers(audioBuffers);
-    // source.addEventListener('ended', () => setIsPlaying(false));
-    audioContext.resume();
-    // setIsPlaying(true);
-    source.start();
+
+    // create pitch shift and connect to destination
+    const pitchShift = new Tone.PitchShift().toDestination();
+
+    // create player connected to pitch shift effect with the mixed audio buffer as the source
+    // set player so that audio is looped
+    let mixedBuffer = mixAudioBuffers(audioBuffers);
+    const newPlayer = new Tone.Player(mixedBuffer).connect(pitchShift);
+    newPlayer.loop = true;
+
+    // get the current frequency data of connected audio source using a fast Fourier transform
+    const toneFFT = new Tone.FFT();
+    pitchShift.connect(toneFFT);
+    pitchShift.pitch = 8;
+
+    // play the audio
+    setPlayer(newPlayer);
+    newPlayer.start();
   };
 
   const mixAudioBuffers = (audioBuffers) => {
@@ -230,7 +244,7 @@ const CreateTrackContainer = (props) => {
   };
 
   const stopPlayback = () => {
-    audioSource?.stop();
+    player.stop();
   };
 
   const handleStartRecording = (numBars) => {

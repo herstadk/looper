@@ -1,12 +1,13 @@
 import React from 'react';
 import BlockContainer from './BlockContainer';
 
+
 const containerStyle = {
   display: 'flex',
   width: '100%',
   height: '100%',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'space-around',
 };
 
 const PlayContainer = (props) => {
@@ -23,5 +24,6 @@ const PlayContainer = (props) => {
     </div>
   );
 };
+
 
 export default PlayContainer;

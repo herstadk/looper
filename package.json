@@ -15,6 +15,7 @@
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
     "react-timer-hook": "^3.0.5",
+    "tone": "^14.7.77",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
@@ -44,6 +45,5 @@
   "prettier": {
     "tabWidth": 2,
     "singleQuote": true
-  },
-  "devDependencies": {}
+  }
 }

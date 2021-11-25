@@ -1,4 +1,5 @@
 import React from 'react';
+import { Colors } from '../../styles/colors';
 import Block from './Block';
 
 const rowStyle = {
