@@ -10,11 +10,12 @@ const containerStyle = {
 };
 
 const PlayContainer = (props) => {
-  const { tracks, state, onCountdownFinished, duration } = props;
+  const { audioSettings, tracks, state, onCountdownFinished, duration } = props;
 
   return (
     <div style={containerStyle}>
       <BlockContainer
+        audioSettings={audioSettings}
         tracks={tracks}
         state={state}
         onCountdownFinished={onCountdownFinished}

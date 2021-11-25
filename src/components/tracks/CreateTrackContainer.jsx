@@ -4,6 +4,7 @@ import PlayContainer from './PlayContainer';
 import { getAllBlobs } from '../../utils/blobs';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
+import { getSecPerBeat } from '../../utils/audio';
 
 const containerStyle = {
   height: '100%',
@@ -69,12 +70,12 @@ const CreateTrackContainer = (props) => {
     onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
   });
 
-  const getSecPerBeat = () => {
-    return 1 / (bpm / 60);
-  };
+  const getAudioSettings = () =>{
+    return {bpm: bpm, beatsPerBar: beatsPerBar, barsPerLoop: barsPerLoop, maxBarsPerLoop: maxBarsPerLoop};
+  }
 
-  const getFullDuration = () => {
-    return maxBarsPerLoop * beatsPerBar * getSecPerBeat();
+  const getTrackDuration = () => {
+    return maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm);
   };
 
   const loadAudioBuffer = useCallback(
@@ -263,10 +264,11 @@ const CreateTrackContainer = (props) => {
         stopRecording={stopLoopRecording}
       />
       <PlayContainer
+        audioSettings={getAudioSettings()}
         tracks={audioBuffers}
         state={state}
         onCountdownFinished={onCountdownFinished}
-        duration={getFullDuration()}
+        duration={getTrackDuration()}
       />
     </div>
   );

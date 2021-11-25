@@ -6,6 +6,7 @@ import { useResizeDetector } from 'react-resize-detector';
 
 const outerContainerStyle = {
   display: 'flex',
+  overflow: 'auto',
   height: '80%',
   width: '80%',
   justifyContent: 'center',
@@ -14,6 +15,7 @@ const outerContainerStyle = {
 
 const innerContainerStyle = {
   display: 'flex',
+  gap: 2,
   flex: '1 1 auto',
   flexDirection: 'column',
   alignItems: 'center',
@@ -31,21 +33,22 @@ const getBlockColor = (idx) => {
 };
 
 const BlockContainer = (props) => {
-  const { tracks, state, onCountdownFinished, duration } = props;
+  const { audioSettings, tracks, state, onCountdownFinished, duration } = props;
   const { height, width, ref } = useResizeDetector();
 
   return (
     <div style={outerContainerStyle}>
-      {/* <ProgressBar
+      <ProgressBar
         state={state}
         showProgress
         height={height}
         width={width}
         duration={duration}
-      /> */}
+      />
       <div style={innerContainerStyle} ref={ref}>
         {tracks.map((track, idx) => (
           <BlockRow
+            audioSettings={audioSettings}
             state={state}
             color={getBlockColor(idx)}
             track={track}
