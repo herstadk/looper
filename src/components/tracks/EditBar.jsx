@@ -36,14 +36,14 @@ const EditBar = (props) => {
         setPitch(value);
         return `${value}`;
     }
-    
+
     return (
         <div class="editBar">
             EditBar
             <Slider
                 aria-label= "Steps"
                 defaultValue={0.0}
-                step={0.5}
+                step={0.05}
                 min={-10.0}
                 max={10.0}
                 valueLabelDisplay="auto"
