@@ -134,11 +134,6 @@ const CreateTrackContainer = (props) => {
      */
   }, [loadFetchedAudioBuffers]);
 
-  // set audiocontext to what we are working with instead of default Tone.js context
-  useEffect(() => {
-    Tone.setContext(audioContext);
-  }, []);
-
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
     setMediaBlobUrls((curMediaBlobUrls) => [

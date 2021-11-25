@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import React from 'react';
-import { getBlobNames, getBlobByChoice } from '../../utils/blobs';
+import { getBlobNames } from '../../utils/blobs';
 import Select from 'react-select';
 
 const PlayDropdown = (props) => {
