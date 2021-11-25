@@ -228,7 +228,6 @@ const CreateTrackContainer = (props) => {
   const [audioSelection, setAudioSelection] = useState(null);
   const getAudioSelection = (childData) => {
 	  setAudioSelection(childData);
-	  console.log("Play container has blob:", childData);
   }
 
 	const getPitchValueFromBar = (data) => {

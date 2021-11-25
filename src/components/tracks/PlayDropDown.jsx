@@ -21,23 +21,6 @@ const PlayDropdown = (props) => {
         getTracks();
     }, [])
 
-    // push selected track up?
-    /* 
-    useEffect(() => {
-        console.log("Selected track: ", selectedTrack)
-        // get blob name
-        //let tempBlob = getBlob(selectedTrack)
-        async function getTheBlob() {
-            const tempBlob = await getBlobByChoice(selectedTrack)
-
-            //console.log("will load",tempBlob)
-            // set audio source to the temp blob
-            //setLoadedBlob(tempBlob);
-        }
-        getTheBlob();
-
-    }, [selectedTrack])
-    */
     const clickResult = (e) => {
         console.log("Clicked for result: ", e);
         console.log(e);
