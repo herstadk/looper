@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
-import { getAllBlobs } from '../../utils/blobs';
+import EditBar from './EditBar';
+import { getAllBlobs, getBlob } from '../../utils/blobs';
+import '../../styles/pageStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
 import * as Tone from 'tone';
@@ -65,6 +67,7 @@ const CreateTrackContainer = (props) => {
   const [maxBarsPerLoop] = useState(4);
   const [player, setPlayer] = useState(null); // Tone.js player to play mixed audio buffer
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
+  const [pitchValue, setPitchValueFromBar] = useState(null);
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
@@ -261,27 +264,53 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
+  const [audioSelection, setAudioSelection] = useState(null);
+  const getAudioSelection = (childData) => {
+	  setAudioSelection(childData);
+  }
+
+	const getPitchValueFromBar = (data) => {
+		
+		setPitchValueFromBar(data);
+		console.log("Create Track has pitch:", data);
+	}
+
   return (
     <div style={containerStyle}>
+	<button onClick={async () => {
+		const blob = await getBlob(audioSelection);
+		console.log("Blob", blob);
+		addMediaBlobUrl(blob);
+	}}>Get Track</button>
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <ControlPanel
-        state={state}
-        mediaBlobUrls={mediaBlobUrls}
-        handleStartRecording={handleStartRecording}
-        stopPlayback={stopPlayback}
-        stopRecording={stopLoopRecording}
-      />
-      <PlayContainer
-        tracks={audioBuffers}
-        state={state}
-        onCountdownFinished={onCountdownFinished}
-        duration={getFullDuration()}
-      />
+	  <div class="flex-container">
+		<div class="flex-child left">
+			<ControlPanel
+				state={state}
+				mediaBlobUrls={mediaBlobUrls}
+				handleStartRecording={handleStartRecording}
+				stopPlayback={stopPlayback}
+				stopRecording={stopLoopRecording}
+			/>
+			<PlayContainer
+				tracks={audioBuffers}
+				state={state}
+				onCountdownFinished={onCountdownFinished}
+				duration={getFullDuration()}
+				getAudioSelection={getAudioSelection}
+			/>
+		</div>
+		<div class="flex-child right">
+			<EditBar
+				getPitchValueFromBar={getPitchValueFromBar}
+			/>
+		</div>
+	  </div>
     </div>
   );
 };
