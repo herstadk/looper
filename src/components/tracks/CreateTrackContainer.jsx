@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
-import { getAllBlobs } from '../../utils/blobs';
+import { getAllBlobs, getBlob } from '../../utils/blobs';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
 
@@ -102,31 +102,6 @@ const CreateTrackContainer = (props) => {
     },
     [loadAudioBuffer]
   );
-
-  useEffect(() => {
-    /**
-     *
-     *
-     * Testing get requests from azure
-     *
-     *
-     */
-    async function myfunc() {
-      let allBlobs = await getAllBlobs();
-      loadFetchedAudioBuffers(allBlobs);
-      setMediaBlobUrls([...allBlobs]);
-    }
-    myfunc();
-    /**
-     *
-     *
-     *
-     * End testing get requests
-     *
-     *
-     *
-     */
-  }, [loadFetchedAudioBuffers]);
 
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
@@ -247,8 +222,19 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
+  const [audioSelection, setAudioSelection] = useState(null);
+  const getAudioSelection = (childData) => {
+	  setAudioSelection(childData);
+	  console.log("Play container has blob:", childData);
+  }
+
   return (
     <div style={containerStyle}>
+	<button onClick={async () => {
+		const blob = await getBlob(audioSelection);
+		console.log("Blob", blob);
+		addMediaBlobUrl(blob);
+	}}>Get Track</button>
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
@@ -267,6 +253,7 @@ const CreateTrackContainer = (props) => {
         state={state}
         onCountdownFinished={onCountdownFinished}
         duration={getFullDuration()}
+		getAudioSelection={getAudioSelection}
       />
     </div>
   );

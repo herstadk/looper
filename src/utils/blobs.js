@@ -44,10 +44,45 @@ const getAllBlobs = async () => {
     });
 };
 
+// Utility for getting only blob names from database (for user selection of specific audio)
+const getBlobNames = async () => {
+
+    // Returns a dictionary of Etag / Name pairs
+    var entries = [];
+
+    // set up request
+    const getAllQueryString = "?restype=container&comp=list";
+    const getAllURL = azureStorageURL + getAllQueryString;
+    const blobHeaders = new Headers();
+    blobHeaders.append('x-ms-version', versionHeader);
+
+    // make request and return all blobs
+    return await fetch(getAllURL, {
+        headers: blobHeaders
+    })
+    .then(res => res.text())
+    .then(async res => {
+        // parse xml response to get blob names
+        let parser = new DOMParser();
+        let xml = parser.parseFromString(res, "application/xml");
+        let blobNames = xml.getElementsByTagName('Name');
+        let blobIDs = xml.getElementsByTagName('Etag');
+
+        for(var i = 0; i < blobNames.length; i ++){
+            var temp = {value: blobIDs[i].innerHTML, label: blobNames[i].innerHTML};
+            entries.push(temp);
+        }
+
+        return entries;
+    });
+};
+
 const getBlob = async (blobName) => {
     let mediaBlob = await fetch((azureStorageURL + blobName)).then(res => res.blob());
     let mediaBlobUrl = window.URL.createObjectURL(mediaBlob);
+    //let mediaBlobUrl = "https://loopr.blob.core.windows.net/audio-files/"+blobName
     return { mediaBlobUrl, saved: true };
+    //return { mediaBlob, saved: true };
 };
 
 const postBlob = async (blob, name) => {
@@ -81,4 +116,4 @@ const postBlob = async (blob, name) => {
     });
 };
 
-export { getAllBlobs, getBlob, postBlob };
+export { getAllBlobs, getBlob, postBlob, getBlobNames };

@@ -1,21 +1,37 @@
 import React from 'react';
-import { FaPlay } from 'react-icons/fa'
+import { IconContext } from 'react-icons';
+import { FaPlay, FaStop } from 'react-icons/fa'
 import { Colors } from '../../styles/colors';
 
-const PlayButton = ({onClick}, {playState}) => {
-    
+const buttonStylePlay = {
+    cursor: 'pointer',
+    color: Colors.green,
+}
+const buttonStyleStop = {
+    cursor: 'pointer',
+    color: Colors.red,
+}
+
+const PlayButton = (props) => {
+    const { onClick, isPlaying } = props;
+
     return (
-        <div id="play-button" data-playing="false">
-            
-            <FaPlay 
-                style={{
-                color: Colors.green, 
-                cursor: 'pointer' 
-                }} 
-                //onClick={() => console.log("Clicked Play")}
-                onClick={onClick}
-            />
-            
+        <div data-testid={'record-button'}>
+            <IconContext.Provider value={{ color: Colors.green, size: 100 }}>
+				{isPlaying ? (
+					<FaStop
+                        data-testid={'stop-icon'}
+                        style={buttonStyleStop} 
+                        onClick={() => onClick()}
+					/>
+				) : (
+					<FaPlay
+                        data-testid={'play-icon'}
+                        style={buttonStylePlay} 
+                        onClick={() => onClick()}
+                    />
+				)}
+			</IconContext.Provider>
         </div>
     )
 }
