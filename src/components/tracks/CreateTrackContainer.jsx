@@ -64,10 +64,10 @@ const CreateTrackContainer = (props) => {
   const [bpm] = useState(120);
   const [beatsPerBar] = useState(4);
   const [maxBarsPerLoop] = useState(4);
-  const [player, setPlayer] = useState(null); // Tone.js player to play mixed audio buffer
-  const [pitchFilter, setPitchFilter] = useState(null);
+  const [players, setPlayers] = useState([]); // Tone.js list of players for each audio buffer
+  const [pitchFilters, setPitchFilters] = useState([]); // tracking pitch filters for each player
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
-  const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
+  // const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
@@ -147,66 +147,43 @@ const CreateTrackContainer = (props) => {
     setAudioBuffers((curAudioBuffers) => [...curAudioBuffers, newAudioBuffer]);
   };
 
+  // create players and filters
+  useEffect(() => {
+    let allPlayers = [];
+    let allPitchFilters = [];
+
+    for (let buffer of audioBuffers) {
+      // init pitch shift filter
+      let pitchShift = new Tone.PitchShift().toDestination();
+      let toneFFT = new Tone.FFT();
+      pitchShift.connect(toneFFT);
+
+      // init player
+      let player = new Tone.Player(buffer).connect(pitchShift);
+      player.loop = true;
+
+      allPlayers.push(player);
+      allPitchFilters.push(pitchShift);
+    }
+
+    setPlayers(allPlayers);
+    setPitchFilters(allPitchFilters);
+  }, [audioBuffers]);
+
   const playAudio = () => {
     if (mediaBlobUrls.length === 0) {
       return; // don't attempt to play without any audio elements loaded
     }
 
-    // create pitch shift and connect to destination
-    const pitchShift = new Tone.PitchShift().toDestination();
-
-    // create player connected to pitch shift effect with the mixed audio buffer as the source
-    // set player so that audio is looped
-    let mixedBuffer = mixAudioBuffers(audioBuffers);
-    const newPlayer = new Tone.Player(mixedBuffer).connect(pitchShift);
-    // newPlayer.loop = true;
-
-    // get the current frequency data of connected audio source using a fast Fourier transform
-    const toneFFT = new Tone.FFT();
-    pitchShift.connect(toneFFT);
-    pitchShift.pitch = pitchValue;
-    setPitchFilter(pitchShift);
-
-    // play the audio
-    setPlayer(newPlayer);
-    newPlayer.start();
+    // play all audio
+    startAllPlayers();
   };
 
-  const mixAudioBuffers = (audioBuffers) => {
-    const numChannels = getMinNumChannels(audioBuffers);
-    const length = getMaxTrackLength(audioBuffers);
-    const mix = audioContext.createBuffer(
-      numChannels,
-      length,
-      audioContext.sampleRate
-    );
-    for (const audioBuffer of audioBuffers) {
-      // Mix sound channels seperately
-      for (let channel = 0; channel < numChannels; channel++) {
-        const mixChannelBuffer = mix.getChannelData(channel);
-        const audioChannelBuffer = audioBuffer.getChannelData(channel);
-        let totalBytes = 0;
-        // Loop all but the longest track
-        while (totalBytes < length) {
-          // Sum audio byte by byte
-          for (let byte = 0; byte < audioBuffer.length; byte++) {
-            mixChannelBuffer[totalBytes] += audioChannelBuffer[byte];
-            totalBytes += 1;
-          }
-        }
-      }
+  const startAllPlayers = () => {
+    for (let player of players) {
+      player.start();
     }
-
-    return mix;
-  };
-
-  const getMinNumChannels = (audioBuffers) => {
-    return Math.min(...audioBuffers.map((x) => x.numberOfChannels));
-  };
-
-  const getMaxTrackLength = (audioBuffers) => {
-    return Math.max(...audioBuffers.map((x) => x.length));
-  };
+  }
 
   const startCountdown = () => {
     const time = setTimer(3);
@@ -243,7 +220,9 @@ const CreateTrackContainer = (props) => {
   };
 
   const stopPlayback = () => {
-    player.stop();
+    for (let player of players) {
+      player.stop();
+    }
   };
 
   const handleStartRecording = (numBars) => {
@@ -265,12 +244,11 @@ const CreateTrackContainer = (props) => {
 	  setAudioSelection(childData);
   }
 
+  // changes pitch of audio in real time during playback
 	const getPitchValueFromBar = (data, pitchFilter) => {
-    if (pitchFilter !== null) {
-      pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr
+    if (pitchFilter !== null && pitchFilter !== undefined) {
+      pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr?????????????
     }
-		setPitchValueFromBar(data);
-		console.log("Create Track has pitch:", data);
 	}
 
   return (
@@ -308,8 +286,7 @@ const CreateTrackContainer = (props) => {
         <div class="flex-child right">
           <EditBar
             getPitchValueFromBar={getPitchValueFromBar}
-            name={'Pitch'}
-            pitchFilter={pitchFilter}
+            pitchFilters={pitchFilters}
           />
         </div>
       </div>
