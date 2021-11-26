@@ -151,23 +151,7 @@ const CreateTrackContainer = (props) => {
   useEffect(() => {
     let allPlayers = [];
     let allPitchFilters = [];
-    initPlayers(allPlayers, allPitchFilters);
-    setPlayers(allPlayers);
-    setPitchFilters(allPitchFilters);
-  }, [audioBuffers]);
 
-  const playAudio = () => {
-    if (mediaBlobUrls.length === 0) {
-      return; // don't attempt to play without any audio elements loaded
-    }
-
-    // play all audio
-    startAllPlayers();
-  };
-
-  // create players for each audio buffer with all the requisite filters
-  // populates each list in the params with their respective players or filters
-  const initPlayers = (allPlayers, allPitchFilters) => {
     for (let buffer of audioBuffers) {
       // init pitch shift filter
       let pitchShift = new Tone.PitchShift().toDestination();
@@ -181,6 +165,18 @@ const CreateTrackContainer = (props) => {
       allPlayers.push(player);
       allPitchFilters.push(pitchShift);
     }
+
+    setPlayers(allPlayers);
+    setPitchFilters(allPitchFilters);
+  }, [audioBuffers]);
+
+  const playAudio = () => {
+    if (mediaBlobUrls.length === 0) {
+      return; // don't attempt to play without any audio elements loaded
+    }
+
+    // play all audio
+    startAllPlayers();
   };
 
   const startAllPlayers = () => {
