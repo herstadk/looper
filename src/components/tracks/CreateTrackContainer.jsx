@@ -243,14 +243,26 @@ const CreateTrackContainer = (props) => {
   const [audioSelection, setAudioSelection] = useState(null);
   const getAudioSelection = (childData) => {
 	  setAudioSelection(childData);
-  }
+  };
 
   // changes pitch of audio in real time during playback
 	const getPitchValueFromBar = (data, pitchFilter) => {
     if (pitchFilter !== null && pitchFilter !== undefined) {
       pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr?????????????
     }
-	}
+	};
+
+  // changes if the audio is reversed
+  const reverseAudio = (player, checked) => {
+    if (player !== null && player !== undefined) {
+      if (checked) {
+        player.reverse = true;
+      }
+      else {
+        player.reverse = false;
+      }
+    }
+  };
 
   return (
     <div style={containerStyle}>
@@ -288,6 +300,8 @@ const CreateTrackContainer = (props) => {
           <EditBar
             getPitchValueFromBar={getPitchValueFromBar}
             pitchFilters={pitchFilters}
+            reverseAudio={reverseAudio}
+            players={players}
           />
         </div>
       </div>
