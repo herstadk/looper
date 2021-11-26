@@ -19,6 +19,7 @@
     "react-scripts": "4.0.3",
     "react-select": "^5.2.1",
     "react-timer-hook": "^3.0.5",
+    "tone": "^14.7.77",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
@@ -48,6 +49,5 @@
   "prettier": {
     "tabWidth": 2,
     "singleQuote": true
-  },
-  "devDependencies": {}
+  }
 }

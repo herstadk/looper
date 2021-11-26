@@ -4,7 +4,7 @@ import '../../styles/pageStyle.css';
 
 const EditBar = (props) => {
 
-    const {getPitchValueFromBar} = props;
+    const {getPitchValueFromBar, name, pitchFilter} = props;
 
     const [pitchValue, setPitch] = useState(null);
 
@@ -39,7 +39,7 @@ const EditBar = (props) => {
 
     return (
         <div class="editBar">
-            EditBar
+            {name}
             <Slider
                 aria-label= "Steps"
                 defaultValue={0.0}
@@ -50,7 +50,7 @@ const EditBar = (props) => {
                 getAriaValueText={valuetext}
                 marks={marks}
             />
-            {getPitchValueFromBar(pitchValue)}
+            {getPitchValueFromBar(pitchValue, pitchFilter)}
         </div>
     )
 }

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import BlockContainer from './BlockContainer';
 import PlayDropdown from './PlayDropDown';
 
+
 const containerStyle = {
   display: 'flex',
   width: '100%',
   height: '100%',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'space-around',
 };
 
 const PlayContainer = (props) => {
