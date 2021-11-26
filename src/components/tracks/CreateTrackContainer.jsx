@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
-import { getAllBlobs } from '../../utils/blobs';
+import EditBar from './EditBar';
+import { getAllBlobs, getBlob } from '../../utils/blobs';
+import '../../styles/pageStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
+import * as Tone from 'tone';
 import { getSecPerBeat } from '../../utils/audio';
+
 
 const containerStyle = {
   height: '100%',
@@ -58,11 +62,13 @@ const CreateTrackContainer = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
   const [audioBuffers, setAudioBuffers] = useState([]);
-  const [audioSource, setAudioSource] = useState(undefined);
   const [bpm] = useState(120);
   const [beatsPerBar] = useState(4);
   const [maxBarsPerLoop] = useState(4);
+  const [player, setPlayer] = useState(null); // Tone.js player to play mixed audio buffer
+  const [pitchFilter, setPitchFilter] = useState(null);
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
+  const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
@@ -146,18 +152,25 @@ const CreateTrackContainer = (props) => {
     if (mediaBlobUrls.length === 0) {
       return; // don't attempt to play without any audio elements loaded
     }
-    if (audioSource) {
-      audioSource.disconnect();
-      setAudioSource(undefined);
-    }
-    const source = audioContext.createBufferSource();
-    setAudioSource(source);
-    source.connect(audioContext.destination);
-    source.buffer = mixAudioBuffers(audioBuffers);
-    // source.addEventListener('ended', () => setIsPlaying(false));
-    audioContext.resume();
-    // setIsPlaying(true);
-    source.start();
+
+    // create pitch shift and connect to destination
+    const pitchShift = new Tone.PitchShift().toDestination();
+
+    // create player connected to pitch shift effect with the mixed audio buffer as the source
+    // set player so that audio is looped
+    let mixedBuffer = mixAudioBuffers(audioBuffers);
+    const newPlayer = new Tone.Player(mixedBuffer).connect(pitchShift);
+    // newPlayer.loop = true;
+
+    // get the current frequency data of connected audio source using a fast Fourier transform
+    const toneFFT = new Tone.FFT();
+    pitchShift.connect(toneFFT);
+    pitchShift.pitch = pitchValue;
+    setPitchFilter(pitchShift);
+
+    // play the audio
+    setPlayer(newPlayer);
+    newPlayer.start();
   };
 
   const mixAudioBuffers = (audioBuffers) => {
@@ -231,7 +244,7 @@ const CreateTrackContainer = (props) => {
   };
 
   const stopPlayback = () => {
-    audioSource?.stop();
+    player.stop();
   };
 
   const handleStartRecording = (numBars) => {
@@ -248,28 +261,59 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
+  const [audioSelection, setAudioSelection] = useState(null);
+  const getAudioSelection = (childData) => {
+	  setAudioSelection(childData);
+  }
+
+	const getPitchValueFromBar = (data, pitchFilter) => {
+    if (pitchFilter !== null) {
+      pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr
+    }
+		setPitchValueFromBar(data);
+		console.log("Create Track has pitch:", data);
+	}
+
   return (
     <div style={containerStyle}>
+      <button onClick={async () => {
+        const blob = await getBlob(audioSelection);
+        console.log("Blob", blob);
+        addMediaBlobUrl(blob);
+      }}>
+        Get Track
+      </button>
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <ControlPanel
-        state={state}
-        mediaBlobUrls={mediaBlobUrls}
-        handleStartRecording={handleStartRecording}
-        stopPlayback={stopPlayback}
-        stopRecording={stopLoopRecording}
-      />
-      <PlayContainer
-        audioSettings={getAudioSettings()}
-        tracks={audioBuffers}
-        state={state}
-        onCountdownFinished={onCountdownFinished}
-        duration={getTrackDuration()}
-      />
+      <div class="flex-container">
+        <div class="flex-child left">
+          <ControlPanel
+            state={state}
+            mediaBlobUrls={mediaBlobUrls}
+            handleStartRecording={handleStartRecording}
+            stopPlayback={stopPlayback}
+            stopRecording={stopLoopRecording}
+          />
+          <PlayContainer
+            tracks={audioBuffers}
+            state={state}
+            onCountdownFinished={onCountdownFinished}
+            duration={getFullDuration()}
+            getAudioSelection={getAudioSelection}
+          />
+        </div>
+        <div class="flex-child right">
+          <EditBar
+            getPitchValueFromBar={getPitchValueFromBar}
+            name={'Pitch'}
+            pitchFilter={pitchFilter}
+          />
+        </div>
+      </div>
     </div>
   );
 };
