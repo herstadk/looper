@@ -162,13 +162,9 @@ const CreateTrackContainer = (props) => {
 
       // init panner filter
       let panner = new Tone.Panner();
-      panner.connect(toneFFT);
 
       // init player
       let player = new Tone.Player(buffer);
-      // player.connect(panner);
-      // player.connect(pitchShift);
-      // player.fan(panner, pitchShift);
       player.chain(pitchShift, panner, Tone.Destination);
       player.loop = true;
       player.autostart = true;
