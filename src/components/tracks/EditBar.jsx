@@ -1,12 +1,13 @@
 import React from 'react';
 import '../../styles/pageStyle.css';
+import PanSlider from '../effects/PanSlider';
 import PitchSlider from '../effects/PitchSlider';
 import ReverseSwitch from '../effects/ReverseSwitch';
 
 
 const EditBar = (props) => {
 
-    const {getPitchValueFromBar, pitchFilters, players, reverseAudio} = props;
+    const {getPitchValueFromBar, getPanValueFromBar, panFilters, pitchFilters, players, reverseAudio} = props;
 
     return (
       <div class="editBar">
@@ -22,6 +23,11 @@ const EditBar = (props) => {
                 player={players[index]}
               />
               <br />
+              <PanSlider 
+                getPanValueFromBar={getPanValueFromBar}
+                panFilter={panFilters[index]}
+              />
+              <hr />
             </>
           );
         })}

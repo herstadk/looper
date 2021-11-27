@@ -67,6 +67,7 @@ const CreateTrackContainer = (props) => {
   const [maxBarsPerLoop] = useState(4);
   const [players, setPlayers] = useState([]); // Tone.js list of players for each audio buffer
   const [pitchFilters, setPitchFilters] = useState([]); // tracking pitch filters for each player
+  const [panFilters, setPanFilters] = useState([]);
   const [barsPerLoop, setBarsPerLoop] = useState(undefined);
   // const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
@@ -152,23 +153,31 @@ const CreateTrackContainer = (props) => {
   useEffect(() => {
     let allPlayers = [];
     let allPitchFilters = [];
+    let allPanFilters = [];
 
     for (let buffer of audioBuffers) {
       // init pitch shift filter
-      let pitchShift = new Tone.PitchShift().toDestination();
-      let toneFFT = new Tone.FFT();
+      let pitchShift = new Tone.PitchShift();
+      let toneFFT = new Tone.FFT(); // fast fourier transformation for frequency
       pitchShift.connect(toneFFT);
 
+      // init panner filter
+      let panner = new Tone.Panner();
+
       // init player
-      let player = new Tone.Player(buffer).connect(pitchShift);
+      let player = new Tone.Player(buffer);
+      player.chain(pitchShift, panner, Tone.Destination);
       player.loop = true;
+      player.autostart = true;
 
       allPlayers.push(player);
       allPitchFilters.push(pitchShift);
+      allPanFilters.push(panner);
     }
 
     setPlayers(allPlayers);
     setPitchFilters(allPitchFilters);
+    setPanFilters(allPanFilters);
   }, [audioBuffers]);
 
   const playAudio = () => {
@@ -252,6 +261,13 @@ const CreateTrackContainer = (props) => {
     }
 	};
 
+  // changes panning of audio in real time during plaback
+  const getPanValueFromBar = (data, panFilter) => {
+    if (panFilter !== null && panFilter !== undefined) {
+      panFilter.pan.setValueAtTime(data, 0); // another bad form right hurrrrrrrrrrrrrr????????????????????
+    }
+  };
+
   // changes if the audio is reversed
   const reverseAudio = (player, checked) => {
     if (player !== null && player !== undefined) {
@@ -299,8 +315,10 @@ const CreateTrackContainer = (props) => {
         <div class="flex-child right">
           <EditBar
             getPitchValueFromBar={getPitchValueFromBar}
-            pitchFilters={pitchFilters}
+            getPanValueFromBar={getPanValueFromBar}
             reverseAudio={reverseAudio}
+            pitchFilters={pitchFilters}
+            panFilters={panFilters}
             players={players}
           />
         </div>
