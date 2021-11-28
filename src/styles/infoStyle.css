@@ -1,0 +1,12 @@
+:root {
+    --charcoal: #272822;
+    --yellow: #E6DB74;
+}
+
+.info {
+    color: var(--yellow);
+}
+
+.info-text {
+    color: var(--yellow);
+}

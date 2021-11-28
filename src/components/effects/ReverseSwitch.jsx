@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel';
-
+import { Colors } from '../../styles/colors.js';
 
 const ReverseSwitch = (props) => {
     const {player, reverseAudio} = props;
@@ -14,7 +14,14 @@ const ReverseSwitch = (props) => {
 
     return (
         <FormControlLabel 
-            control={<Switch onChange={handleSwitchChange} checked={checked} />} 
+            control={<Switch 
+                onChange={handleSwitchChange} 
+                checked={checked} 
+                sx={{
+                    '& .MuiSwitch-colorPrimary': {
+                      color: Colors.green,
+                    },
+                  }}/>} 
             label="Reverse"
         />
     );
