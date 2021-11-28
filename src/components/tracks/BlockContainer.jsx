@@ -35,7 +35,7 @@ const getBlockColor = (idx) => {
 
 const BlockContainer = (props) => {
   const { audioSettings, tracks, state, onCountdownFinished, duration } = props;
-  const { height, width, ref } = useResizeDetector();
+  const { height, ref } = useResizeDetector();
 
   return (
     <div style={outerContainerStyle}>
@@ -43,7 +43,6 @@ const BlockContainer = (props) => {
         state={state}
         showProgress
         height={height}
-        width={width}
         duration={duration}
       />
       <div style={innerContainerStyle} ref={ref}>
