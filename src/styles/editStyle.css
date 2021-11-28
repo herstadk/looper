@@ -1,0 +1,8 @@
+:root {
+    --charcoal: #272822;
+    --yellow: #E6DB74;
+}
+
+.item-editBar{
+    color: var(--yellow);
+}

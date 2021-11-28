@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../styles/pageStyle.css';
+import '../../styles/editStyle.css';
 import PanSlider from '../effects/PanSlider';
 import PitchSlider from '../effects/PitchSlider';
 import ReverseSwitch from '../effects/ReverseSwitch';
@@ -15,7 +16,7 @@ const EditBar = (props) => {
   } = props;
 
   return (
-    <div className="editBar">
+    <div className="item-editBar">
       {pitchFilters.map((pitchFilter, index) => {
         return (
           <div key={index}>

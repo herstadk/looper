@@ -1,26 +1,78 @@
-.flex-container {
-    display: flex;
+:root {
+    --charcoal: #272822;
+    --yellow: #E6DB74;
+    --black: #1e1f1c;
+  }
+
+.container-createTrack {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
     width: 100%;
     height: 100%;
-    gap: 10px;
-    justify-content: center;
 }
+.container-leftBlock {
+    display: grid;
+    grid-column-start: 1;
+    grid-column-end: 2;
 
-.flex-child {
-    flex: 1;
-    border: 2px solid yellow;
-}  
+    border-style: solid;
+    border-width: 3px;
+    border-color: var(--black);
+    background-color: var(--charcoal);
 
-.flex-child:left {
-    width: 80%;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(5, 1fr);
 }
-
-.flex-child:right {
-    width: 20%;
+/* child of left block */
+.container-controls {
+    
+    border-style: solid;
+    border-width: 3px;
+    border-color: var(--yellow);
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
 }
+/* Section containing the colored play bars */
+.container-playBars{
+    border-style: solid;
+    border-width: 3px;
+    border-color: green;
 
-.editBar {
-    width: 90%;
-    color: yellow;
-    text-align: center;
+    grid-row-start: 2;
+    grid-row-end: 6;
+}
+.container-rightBlock {
+    display: grid;
+    grid-column-start: 2;
+    grid-column-end: 3;
+    border-style: solid;
+    border-width: 3px;
+    border-color: var(--black);
+    background-color: var(--charcoal);
+
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(5, 1fr);
+}
+/* Section for containing info, track selection
+* Child of right block */
+.container-info{
+    display: grid;
+    flex-direction: column;
+    border-style: solid;
+    border-width: 3px;
+    border-color: red;
+
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+.container-editBar{
+    border-style: solid;
+    border-width: 3px;
+    border-color: blue;
+
+    grid-row-start: 2;
+    grid-row-end: 6;
 }

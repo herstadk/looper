@@ -1,6 +1,5 @@
 import React from 'react';
 import BlockContainer from './BlockContainer';
-import PlayDropdown from './PlayDropDown';
 
 const containerStyle = {
   display: 'flex',
@@ -17,7 +16,6 @@ const PlayContainer = (props) => {
     state,
     onCountdownFinished,
     duration,
-    setAudioSelection,
   } = props;
 
   return (
@@ -29,7 +27,6 @@ const PlayContainer = (props) => {
         onCountdownFinished={onCountdownFinished}
         duration={duration}
       />
-      <PlayDropdown setAudioSelection={setAudioSelection} />
     </div>
   );
 };

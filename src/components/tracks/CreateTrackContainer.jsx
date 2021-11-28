@@ -2,21 +2,14 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
+import GetTrack from './GetTrack';
 import { getBlob } from '../../utils/blobs';
 import '../../styles/pageStyle.css';
+import '../../styles/infoStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
 import * as Tone from 'tone';
 import { getSecPerBeat } from '../../utils/audio';
-
-const containerStyle = {
-  height: '100%',
-  width: '100%',
-  display: 'flex',
-  flexFlow: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
 
 const initialState = {
   initiatingCountdown: false,
@@ -286,49 +279,62 @@ const CreateTrackContainer = (props) => {
   };
 
   return (
-    <div style={containerStyle}>
-      <button
-        onClick={async () => {
-          const blob = await getBlob(audioSelection);
-          addMediaBlobUrl(blob);
-        }}
-      >
-        Get Track
-      </button>
+    <div class="container-createTrack">
+      
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <div className="flex-container">
-        <div className="flex-child left">
-          <ControlPanel
-            state={state}
-            mediaBlobUrls={mediaBlobUrls}
-            handleStartRecording={handleStartRecording}
-            startPlayback={playAudio}
-            stopPlayback={pauseAudio}
-            stopRecording={stopLoopRecording}
-          />
-          <PlayContainer
-            audioSettings={getAudioSettings()}
-            tracks={audioBuffers}
-            state={state}
-            onCountdownFinished={onCountdownFinished}
-            duration={getTrackDuration()}
+      <div class="container-leftBlock">
+          <div class="container-controls">
+            <ControlPanel
+              state={state}
+              mediaBlobUrls={mediaBlobUrls}
+              handleStartRecording={handleStartRecording}
+              startPlayback={playAudio}
+              stopPlayback={pauseAudio}
+              stopRecording={stopLoopRecording}
+            />
+          </div>
+          <div class="container-playBars">
+            <PlayContainer
+              audioSettings={getAudioSettings()}
+              tracks={audioBuffers}
+              state={state}
+              onCountdownFinished={onCountdownFinished}
+              duration={getTrackDuration()}
+            />
+          </div>
+      </div>
+      <div className="container-rightBlock">
+        <div class="container-info">
+          <h1 class="info">Loopr</h1>
+          <p class="info-text">
+            CS467 Project created by Josh Kyser, Kyler Herstad, Josh Fiedler 
+          </p>
+          <button
+            onClick={async () => {
+              const blob = await getBlob(audioSelection);
+              addMediaBlobUrl(blob);
+            }}
+          >
+            Get Track
+          </button>
+          <GetTrack
             setAudioSelection={setAudioSelection}
           />
         </div>
-        <div className="flex-child right">
-          <EditBar
-            getPitchValueFromBar={getPitchValueFromBar}
-            getPanValueFromBar={getPanValueFromBar}
-            reverseAudio={reverseAudio}
-            pitchFilters={pitchFilters}
-            panFilters={panFilters}
-            players={players}
-          />
+        <div class="container-editBar">
+        <EditBar
+          getPitchValueFromBar={getPitchValueFromBar}
+          getPanValueFromBar={getPanValueFromBar}
+          reverseAudio={reverseAudio}
+          pitchFilters={pitchFilters}
+          panFilters={panFilters}
+          players={players}
+        />
         </div>
       </div>
     </div>
