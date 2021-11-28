@@ -3,6 +3,8 @@ import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
 import RecordButton from './RecordButton';
+import LoadButton from '../load/LoadButton';
+
 
 const controlPanelStyle = {
   display: 'flex',
@@ -30,6 +32,7 @@ const ControlPanel = (props) => {
         stopRecording={stopRecording}
       />
       <SaveButton mediaBlobUrls={mediaBlobUrls} />
+      <LoadButton />
       <LoopControlRow
         initializeRecording={(numBars) => handleStartRecording(numBars)}
       />

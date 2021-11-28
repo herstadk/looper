@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import SaveModal from './SaveModal';
+import LoadModal from './LoadModal';
 
 
-const displaySaveModal = (setModalDisplay) => {
+const displayLoadModal = (setModalDisplay) => {
     setModalDisplay('block');
 };
 
