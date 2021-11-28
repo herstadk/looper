@@ -1,22 +1,39 @@
 import React from 'react';
 import Block from './Block';
+import { getSecPerBeat } from '../../utils/audio';
 
 const rowStyle = {
   display: 'flex',
-  width: '1200px',
+  gap: 2,
+  alignItems: 'stretch',
+  justifyContent: 'space-between',
   height: '100px',
-  borderRadius: '2px',
-  overflow: 'hidden',
+  width: '100%',
 };
 
 const BlockRow = (props) => {
-  const { color, inProgress, state, onCountdownFinished } = props;
-  const loops = [1];
+  const {
+    audioSettings,
+    color,
+    inProgress,
+    state,
+    track,
+    onCountdownFinished,
+  } = props;
+  const { bpm, beatsPerBar, barsPerLoop, maxBarsPerLoop } = audioSettings;
+  const maxDuration = maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm);
+  const numLoops = track
+    ? Math.max(1, Math.floor(maxDuration / track.duration))
+    : maxBarsPerLoop / barsPerLoop;
+  const totalWaveformDivisions = 300;
+  const divisionsPerLoop = Math.floor(totalWaveformDivisions / numLoops);
   return (
     <div style={rowStyle}>
-      {loops.map((loop, idx) => {
+      {[...Array(numLoops)].map((_, idx) => {
         return (
           <Block
+            waveformDivisions={divisionsPerLoop}
+            track={track}
             state={state}
             onCountdownFinished={onCountdownFinished}
             inProgress={inProgress}
