@@ -9,7 +9,6 @@ import Timer from './Timer';
 import * as Tone from 'tone';
 import { getSecPerBeat } from '../../utils/audio';
 
-
 const containerStyle = {
   height: '100%',
   width: '100%',
@@ -41,8 +40,17 @@ const reducer = (state, action) => {
       return {
         ...state,
         recording: false,
-        playingAudio: false,
         expiryTimestamp: undefined,
+      };
+    case 'PLAYBACK_STARTED':
+      return {
+        ...state,
+        playingAudio: true,
+      };
+    case 'PLAYBACK_ENDED':
+      return {
+        ...state,
+        playingAudio: false,
       };
     case 'COUNTDOWN_STARTED':
       return {
@@ -77,9 +85,14 @@ const CreateTrackContainer = (props) => {
     onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
   });
 
-  const getAudioSettings = () =>{
-    return {bpm: bpm, beatsPerBar: beatsPerBar, barsPerLoop: barsPerLoop, maxBarsPerLoop: maxBarsPerLoop};
-  }
+  const getAudioSettings = () => {
+    return {
+      bpm: bpm,
+      beatsPerBar: beatsPerBar,
+      barsPerLoop: barsPerLoop,
+      maxBarsPerLoop: maxBarsPerLoop,
+    };
+  };
 
   const getTrackDuration = () => {
     return maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm);
@@ -151,10 +164,13 @@ const CreateTrackContainer = (props) => {
 
   // create players and filters
   useEffect(() => {
+    Tone.Transport.bpm.value = bpm;
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = '0m';
+    Tone.Transport.loopEnd = `${maxBarsPerLoop}m`;
     let allPlayers = [];
     let allPitchFilters = [];
     let allPanFilters = [];
-
     for (let buffer of audioBuffers) {
       // init pitch shift filter
       let pitchShift = new Tone.PitchShift();
@@ -166,42 +182,35 @@ const CreateTrackContainer = (props) => {
 
       // init player
       let player = new Tone.Player(buffer);
-      player.chain(pitchShift, panner, Tone.Destination);
-      player.loop = true;
-      player.autostart = true;
+      player.chain(pitchShift, panner);
+      player.toDestination().sync().start();
 
       allPlayers.push(player);
       allPitchFilters.push(pitchShift);
       allPanFilters.push(panner);
     }
-
     setPlayers(allPlayers);
     setPitchFilters(allPitchFilters);
     setPanFilters(allPanFilters);
-  }, [audioBuffers]);
+  }, [audioBuffers, bpm, maxBarsPerLoop]);
 
   const playAudio = () => {
     if (mediaBlobUrls.length === 0) {
       return; // don't attempt to play without any audio elements loaded
     }
-
-    // play all audio
-    startAllPlayers();
+    Tone.start();
+    Tone.Transport.start();
+    dispatch({ type: 'PLAYBACK_STARTED' });
   };
 
-  const startAllPlayers = () => {
-    for (let player of players) {
-      player.start();
-    }
-  }
-
-  const startCountdown = () => {
-    const time = setTimer(3);
-    return time;
+  const pauseAudio = () => {
+    Tone.Transport.pause();
+    dispatch({ type: 'PLAYBACK_ENDED' });
   };
 
   const onCountdownFinished = () => {
-    playAudio();
+    // playAudio();
+    // Tone.Transport.start();
     const time = startLoopRecording();
     dispatch({ type: 'RECORDING_STARTED', payload: { expiryTimestamp: time } });
   };
@@ -223,7 +232,7 @@ const CreateTrackContainer = (props) => {
   };
 
   const startLoopRecording = () => {
-    const duration = barsPerLoop * beatsPerBar * getSecPerBeat();
+    const duration = barsPerLoop * beatsPerBar * getSecPerBeat(bpm);
     const time = setTimer(duration);
     startRecording();
     return time;
@@ -233,33 +242,42 @@ const CreateTrackContainer = (props) => {
     for (let player of players) {
       player.stop();
     }
+    stopRecording();
   };
 
   const handleStartRecording = (numBars) => {
-    if (state.recording || state.countingDown || state.playingAudio) {
-      return;
-    }
+    if (state.recording || state.countingDown) return;
 
     if (status === 'permission_denied') {
       console.log('Permission denied');
       return;
     }
+    if (numBars > maxBarsPerLoop) return;
+    Tone.start();
     setBarsPerLoop(numBars);
-    const time = startCountdown();
+
+    const progress = Tone.Transport.progress;
+    console.log(progress);
+    const delay = state.playingAudio
+      ? (1 - progress) * maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm)
+      : 3;
+
+    Tone.Transport.start(delay);
+    const time = setTimer(delay);
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
   const [audioSelection, setAudioSelection] = useState(null);
   const getAudioSelection = (childData) => {
-	  setAudioSelection(childData);
+    setAudioSelection(childData);
   };
 
   // changes pitch of audio in real time during playback
-	const getPitchValueFromBar = (data, pitchFilter) => {
+  const getPitchValueFromBar = (data, pitchFilter) => {
     if (pitchFilter !== null && pitchFilter !== undefined) {
-      pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr?????????????
+      pitchFilter.pitch = data; // bad form right hurrrrrrrrrrrrrrrrr?????????????
     }
-	};
+  };
 
   // changes panning of audio in real time during plaback
   const getPanValueFromBar = (data, panFilter) => {
@@ -273,8 +291,7 @@ const CreateTrackContainer = (props) => {
     if (player !== null && player !== undefined) {
       if (checked) {
         player.reverse = true;
-      }
-      else {
+      } else {
         player.reverse = false;
       }
     }
@@ -282,37 +299,32 @@ const CreateTrackContainer = (props) => {
 
   return (
     <div style={containerStyle}>
-      <button onClick={async () => {
-        const blob = await getBlob(audioSelection);
-        console.log("Blob", blob);
-        addMediaBlobUrl(blob);
-      }}>
-        Get Track
-      </button>
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <div class="flex-container">
-        <div class="flex-child left">
+      <div className="flex-container">
+        <div className="flex-child left">
           <ControlPanel
             state={state}
             mediaBlobUrls={mediaBlobUrls}
             handleStartRecording={handleStartRecording}
-            stopPlayback={stopPlayback}
+            startPlayback={playAudio}
+            stopPlayback={pauseAudio}
             stopRecording={stopLoopRecording}
           />
           <PlayContainer
+            audioSettings={getAudioSettings()}
             tracks={audioBuffers}
             state={state}
             onCountdownFinished={onCountdownFinished}
-            duration={getFullDuration()}
+            duration={getTrackDuration()}
             getAudioSelection={getAudioSelection}
           />
         </div>
-        <div class="flex-child right">
+        <div className="flex-child right">
           <EditBar
             getPitchValueFromBar={getPitchValueFromBar}
             getPanValueFromBar={getPanValueFromBar}

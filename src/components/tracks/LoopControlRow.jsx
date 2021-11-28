@@ -1,5 +1,6 @@
 import React from 'react';
 import StartLoopButton from './StartLoopButton';
+import * as Tone from 'tone';
 
 const rowContainerStyle = {
   display: 'flex',
@@ -25,7 +26,9 @@ const LoopControlRow = (props) => {
         {barCountOptions.map((bco) => (
           <StartLoopButton
             number={bco}
-            onClick={() => initializeRecording(bco)}
+            onClick={() => {
+              initializeRecording(bco);
+            }}
             key={bco}
           />
         ))}

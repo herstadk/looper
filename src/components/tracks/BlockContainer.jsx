@@ -1,7 +1,7 @@
 import React from 'react';
 import BlockRow from './BlockRow';
 import { Colors } from '../../styles/colors';
-import ProgressBar from './ProgressBar';
+import Playhead from './Playhead';
 import { useResizeDetector } from 'react-resize-detector';
 
 const outerContainerStyle = {
@@ -16,8 +16,9 @@ const outerContainerStyle = {
 const innerContainerStyle = {
   display: 'flex',
   gap: 2,
-  flex: '1 1 auto',
+  width: '100%',
   flexDirection: 'column',
+  overflow: 'hidden',
   alignItems: 'center',
 };
 
@@ -38,7 +39,7 @@ const BlockContainer = (props) => {
 
   return (
     <div style={outerContainerStyle}>
-      <ProgressBar
+      <Playhead
         state={state}
         showProgress
         height={height}
@@ -57,6 +58,7 @@ const BlockContainer = (props) => {
         ))}
         {state.recording || state.countingDown ? (
           <BlockRow
+            audioSettings={audioSettings}
             state={state}
             color={getBlockColor(tracks.length)}
             inProgress

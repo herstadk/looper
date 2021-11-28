@@ -3,7 +3,16 @@ import { Colors } from '../../styles/colors';
 
 const WaveformSection = (props) => {
   const { height } = props;
-  return <div style={{height: height, backgroundColor: '#D3D3D3', flex: '0 0 0.2%'}}></div>;
-}
+  return (
+    <div
+      style={{
+        display: 'flex',
+        height: height,
+        backgroundColor: '#D3D3D3',
+        flex: '0 0 0.2%',
+      }}
+    ></div>
+  );
+};
 
 export default WaveformSection;
