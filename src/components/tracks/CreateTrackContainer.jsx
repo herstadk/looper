@@ -70,7 +70,6 @@ const CreateTrackContainer = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
   const [audioBuffers, setAudioBuffers] = useState([]);
-  const [processedAudioBuffers, setProcessedAudioBuffers] = useState([]);
   const [bpm] = useState(120);
   const [beatsPerBar] = useState(4);
   const [maxBarsPerLoop] = useState(4);
@@ -199,18 +198,6 @@ const CreateTrackContainer = (props) => {
     Tone.Transport.loopStart = '0m';
     Tone.Transport.loopEnd = `${maxBarsPerLoop}m`;
   }, [bpm, maxBarsPerLoop]);
-
-  useEffect(() => {
-    for (const buffer of audioBuffers) {
-      if (!processedAudioBuffers.includes(buffer)) {
-        createPlayerFromBuffer(buffer);
-        setProcessedAudioBuffers((curProcessedAudioBuffers) => [
-          ...curProcessedAudioBuffers,
-          buffer,
-        ]);
-      }
-    }
-  }, [audioBuffers, createPlayerFromBuffer, processedAudioBuffers]);
 
   const playAudio = () => {
     Tone.Transport.start();
