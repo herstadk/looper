@@ -42,7 +42,7 @@ const Block = (props) => {
     setWaveform(buckets);
     setMax(Math.max(...buckets));
     setMin(Math.min(...buckets));
-  }, [track]);
+  }, [track, waveformDivisions]);
 
   const getHeight = (val) => {
     const adjustedMax = Math.max(Math.abs(min), Math.abs(max));

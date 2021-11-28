@@ -2,8 +2,6 @@ import React from 'react';
 import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
-import { IconContext } from 'react-icons';
-import { BsRecordFill } from 'react-icons/bs';
 import PlayButton from './PlayButton';
 import StopButton from './StopButton';
 import RecordingIndicator from './RecordingIndicator';
@@ -33,7 +31,7 @@ const ControlPanel = (props) => {
       ) : (
         <PlayButton onClick={startPlayback} />
       )}
-      {/* <SaveButton mediaBlobUrls={mediaBlobUrls} /> */}
+      <SaveButton mediaBlobUrls={mediaBlobUrls} />
       <div
         style={{
           display: 'flex',
@@ -57,11 +55,6 @@ const ControlPanel = (props) => {
         <LoopControlRow initializeRecording={handleStartRecording} />
       </div>
       <RecordingIndicator recording={state.recording} />
-      {/* <IconContext.Provider
-        value={{ color: Colors.red, size: 100, boxShadow: '0 0 3px #ff2200' }}
-      >
-        <BsRecordFill />
-      </IconContext.Provider> */}
     </div>
   );
 };

@@ -8,7 +8,7 @@ const WaveformSection = (props) => {
       style={{
         display: 'flex',
         height: height,
-        backgroundColor: '#D3D3D3',
+        backgroundColor: Colors.white,
         flex: '0 0 0.2%',
       }}
     ></div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import StartLoopButton from './StartLoopButton';
-import * as Tone from 'tone';
 
 const rowContainerStyle = {
   display: 'flex',

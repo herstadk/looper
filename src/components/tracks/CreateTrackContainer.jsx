@@ -2,7 +2,7 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
-import { getAllBlobs, getBlob } from '../../utils/blobs';
+import { getAllBlobs } from '../../utils/blobs';
 import '../../styles/pageStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
@@ -70,21 +70,20 @@ const CreateTrackContainer = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mediaBlobUrls, setMediaBlobUrls] = useState([]);
   const [audioBuffers, setAudioBuffers] = useState([]);
+  const [processedAudioBuffers, setProcessedAudioBuffers] = useState([]);
   const [bpm] = useState(120);
   const [beatsPerBar] = useState(4);
   const [maxBarsPerLoop] = useState(4);
   const [players, setPlayers] = useState([]); // Tone.js list of players for each audio buffer
   const [pitchFilters, setPitchFilters] = useState([]); // tracking pitch filters for each player
   const [panFilters, setPanFilters] = useState([]);
-  const [barsPerLoop, setBarsPerLoop] = useState(undefined);
-  // const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
+  const [barsPerLoop, setBarsPerLoop] = useState(4);
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
     blobOptions: { type: 'audio/mpeg' },
     onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
   });
-
   const getAudioSettings = () => {
     return {
       bpm: bpm,
@@ -162,43 +161,55 @@ const CreateTrackContainer = (props) => {
     setAudioBuffers((curAudioBuffers) => [...curAudioBuffers, newAudioBuffer]);
   };
 
-  // create players and filters
+  const createPlayerFromBuffer = useCallback(
+    (buffer) => {
+      // init pitch shift filter
+      const pitchShift = new Tone.PitchShift();
+      const toneFFT = new Tone.FFT(); // fast fourier transformation for frequency
+      pitchShift.connect(toneFFT);
+      setPitchFilters((curPitchFilters) => [...curPitchFilters, pitchShift]);
+
+      // init panner filter
+      const panner = new Tone.Panner();
+      setPanFilters((curPanFilters) => [...curPanFilters, panner]);
+      pitchShift.chain(panner, Tone.Destination);
+
+      // init player for each loop
+      const loops = maxBarsPerLoop / barsPerLoop;
+      for (let i = 0; i < loops; i++) {
+        const player = new Tone.Player(buffer);
+        player.chain(pitchShift);
+        player.sync().start(`${i * barsPerLoop}m`);
+        setPlayers((curPlayers) => [...curPlayers, player]);
+      }
+    },
+    [barsPerLoop, maxBarsPerLoop]
+  );
+
   useEffect(() => {
     Tone.Transport.bpm.value = bpm;
     Tone.Transport.loop = true;
     Tone.Transport.loopStart = '0m';
     Tone.Transport.loopEnd = `${maxBarsPerLoop}m`;
-    let allPlayers = [];
-    let allPitchFilters = [];
-    let allPanFilters = [];
-    for (let buffer of audioBuffers) {
-      // init pitch shift filter
-      let pitchShift = new Tone.PitchShift();
-      let toneFFT = new Tone.FFT(); // fast fourier transformation for frequency
-      pitchShift.connect(toneFFT);
+  }, [bpm, maxBarsPerLoop]);
 
-      // init panner filter
-      let panner = new Tone.Panner();
-
-      // init player
-      let player = new Tone.Player(buffer);
-      player.chain(pitchShift, panner);
-      player.toDestination().sync().start();
-
-      allPlayers.push(player);
-      allPitchFilters.push(pitchShift);
-      allPanFilters.push(panner);
+  useEffect(() => {
+    for (const buffer of audioBuffers) {
+      if (!processedAudioBuffers.includes(buffer)) {
+        createPlayerFromBuffer(buffer);
+        setProcessedAudioBuffers((curProcessedAudioBuffers) => [
+          ...curProcessedAudioBuffers,
+          buffer,
+        ]);
+      }
     }
-    setPlayers(allPlayers);
-    setPitchFilters(allPitchFilters);
-    setPanFilters(allPanFilters);
-  }, [audioBuffers, bpm, maxBarsPerLoop]);
+  }, [audioBuffers, createPlayerFromBuffer, processedAudioBuffers]);
 
   const playAudio = () => {
     if (mediaBlobUrls.length === 0) {
       return; // don't attempt to play without any audio elements loaded
     }
-    Tone.start();
+
     Tone.Transport.start();
     dispatch({ type: 'PLAYBACK_STARTED' });
   };
@@ -209,8 +220,7 @@ const CreateTrackContainer = (props) => {
   };
 
   const onCountdownFinished = () => {
-    // playAudio();
-    // Tone.Transport.start();
+    playAudio();
     const time = startLoopRecording();
     dispatch({ type: 'RECORDING_STARTED', payload: { expiryTimestamp: time } });
   };
@@ -222,7 +232,6 @@ const CreateTrackContainer = (props) => {
 
   const stopLoopRecording = () => {
     stopRecording();
-    stopPlayback();
   };
 
   const setTimer = (duration) => {
@@ -253,8 +262,11 @@ const CreateTrackContainer = (props) => {
       return;
     }
     if (numBars > maxBarsPerLoop) return;
+    if (!state.playingAudio) Tone.Transport.stop(); // reset time incase paused
     Tone.start();
+    console.log('numBars', numBars);
     setBarsPerLoop(numBars);
+    console.log('bpl set to', barsPerLoop);
 
     const progress = Tone.Transport.progress;
     console.log(progress);
@@ -262,7 +274,6 @@ const CreateTrackContainer = (props) => {
       ? (1 - progress) * maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm)
       : 3;
 
-    Tone.Transport.start(delay);
     const time = setTimer(delay);
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
