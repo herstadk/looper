@@ -2,7 +2,7 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
-import { getAllBlobs } from '../../utils/blobs';
+import { getBlob } from '../../utils/blobs';
 import '../../styles/pageStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
@@ -97,70 +97,6 @@ const CreateTrackContainer = (props) => {
     return maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm);
   };
 
-  const loadAudioBuffer = useCallback(
-    (mediaBlobUrl) => {
-      const request = new XMLHttpRequest();
-      request.open('GET', mediaBlobUrl);
-      request.responseType = 'arraybuffer';
-      request.onload = () => {
-        const undecodedAudio = request.response;
-        audioContext.decodeAudioData(undecodedAudio, (audioBuffer) =>
-          addAudioBuffer(audioBuffer)
-        );
-      };
-
-      request.send();
-    },
-    [audioContext]
-  );
-
-  const loadFetchedAudioBuffers = useCallback(
-    (allBlobs) => {
-      for (const blob of allBlobs) {
-        loadAudioBuffer(blob.mediaBlobUrl);
-      }
-    },
-    [loadAudioBuffer]
-  );
-
-  useEffect(() => {
-    /**
-     *
-     *
-     * Testing get requests from azure
-     *
-     *
-     */
-    async function myfunc() {
-      let allBlobs = await getAllBlobs();
-      loadFetchedAudioBuffers(allBlobs);
-      setMediaBlobUrls([...allBlobs]);
-    }
-    myfunc();
-    /**
-     *
-     *
-     *
-     * End testing get requests
-     *
-     *
-     *
-     */
-  }, [loadFetchedAudioBuffers]);
-
-  const addMediaBlobUrl = (newMediaBlobUrl) => {
-    newMediaBlobUrl.saved = false;
-    setMediaBlobUrls((curMediaBlobUrls) => [
-      ...curMediaBlobUrls,
-      newMediaBlobUrl,
-    ]);
-    loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
-  };
-
-  const addAudioBuffer = (newAudioBuffer) => {
-    setAudioBuffers((curAudioBuffers) => [...curAudioBuffers, newAudioBuffer]);
-  };
-
   const createPlayerFromBuffer = useCallback(
     (buffer) => {
       // init pitch shift filter
@@ -186,6 +122,77 @@ const CreateTrackContainer = (props) => {
     [barsPerLoop, maxBarsPerLoop]
   );
 
+  const addAudioBuffer = useCallback(
+    (newAudioBuffer) => {
+      setAudioBuffers((curAudioBuffers) => [
+        ...curAudioBuffers,
+        newAudioBuffer,
+      ]);
+      createPlayerFromBuffer(newAudioBuffer);
+    },
+    [createPlayerFromBuffer]
+  );
+
+  const loadAudioBuffer = useCallback(
+    (mediaBlobUrl) => {
+      const request = new XMLHttpRequest();
+      request.open('GET', mediaBlobUrl);
+      request.responseType = 'arraybuffer';
+      request.onload = () => {
+        const undecodedAudio = request.response;
+        audioContext.decodeAudioData(undecodedAudio, (audioBuffer) =>
+          addAudioBuffer(audioBuffer)
+        );
+      };
+
+      request.send();
+    },
+    [audioContext, addAudioBuffer]
+  );
+
+  // const loadFetchedAudioBuffers = useCallback(
+  //   (allBlobs) => {
+  //     for (const blob of allBlobs) {
+  //       loadAudioBuffer(blob.mediaBlobUrl);
+  //     }
+  //   },
+  //   [loadAudioBuffer]
+  // );
+
+  // useEffect(() => {
+  //   /**
+  //    *
+  //    *
+  //    * Testing get requests from azure
+  //    *
+  //    *
+  //    */
+  //   async function myfunc() {
+  //     let allBlobs = await getAllBlobs();
+  //     loadFetchedAudioBuffers(allBlobs);
+  //     setMediaBlobUrls([...allBlobs]);
+  //   }
+  //   myfunc();
+  //   /**
+  //    *
+  //    *
+  //    *
+  //    * End testing get requests
+  //    *
+  //    *
+  //    *
+  //    */
+  // }, [loadFetchedAudioBuffers]);
+
+  const addMediaBlobUrl = (newMediaBlobUrl) => {
+    newMediaBlobUrl.saved = false;
+    setMediaBlobUrls((curMediaBlobUrls) => [
+      ...curMediaBlobUrls,
+      newMediaBlobUrl,
+    ]);
+    loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
+  };
+
   useEffect(() => {
     Tone.Transport.bpm.value = bpm;
     Tone.Transport.loop = true;
@@ -206,10 +213,6 @@ const CreateTrackContainer = (props) => {
   }, [audioBuffers, createPlayerFromBuffer, processedAudioBuffers]);
 
   const playAudio = () => {
-    if (mediaBlobUrls.length === 0) {
-      return; // don't attempt to play without any audio elements loaded
-    }
-
     Tone.Transport.start();
     dispatch({ type: 'PLAYBACK_STARTED' });
   };
@@ -247,13 +250,6 @@ const CreateTrackContainer = (props) => {
     return time;
   };
 
-  const stopPlayback = () => {
-    for (let player of players) {
-      player.stop();
-    }
-    stopRecording();
-  };
-
   const handleStartRecording = (numBars) => {
     if (state.recording || state.countingDown) return;
 
@@ -264,12 +260,9 @@ const CreateTrackContainer = (props) => {
     if (numBars > maxBarsPerLoop) return;
     if (!state.playingAudio) Tone.Transport.stop(); // reset time incase paused
     Tone.start();
-    console.log('numBars', numBars);
     setBarsPerLoop(numBars);
-    console.log('bpl set to', barsPerLoop);
 
     const progress = Tone.Transport.progress;
-    console.log(progress);
     const delay = state.playingAudio
       ? (1 - progress) * maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm)
       : 3;
@@ -278,10 +271,7 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
-  const [audioSelection, setAudioSelection] = useState(null);
-  const getAudioSelection = (childData) => {
-    setAudioSelection(childData);
-  };
+  const [audioSelection, setAudioSelection] = useState(undefined);
 
   // changes pitch of audio in real time during playback
   const getPitchValueFromBar = (data, pitchFilter) => {
@@ -310,6 +300,14 @@ const CreateTrackContainer = (props) => {
 
   return (
     <div style={containerStyle}>
+      <button
+        onClick={async () => {
+          const blob = await getBlob(audioSelection);
+          addMediaBlobUrl(blob);
+        }}
+      >
+        Get Track
+      </button>
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
@@ -332,7 +330,7 @@ const CreateTrackContainer = (props) => {
             state={state}
             onCountdownFinished={onCountdownFinished}
             duration={getTrackDuration()}
-            getAudioSelection={getAudioSelection}
+            setAudioSelection={setAudioSelection}
           />
         </div>
         <div className="flex-child right">

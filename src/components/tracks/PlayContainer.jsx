@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState } from 'react';
 import BlockContainer from './BlockContainer';
 import PlayDropdown from './PlayDropDown';
 
@@ -18,15 +17,8 @@ const PlayContainer = (props) => {
     state,
     onCountdownFinished,
     duration,
-    getAudioSelection,
+    setAudioSelection,
   } = props;
-
-  // const [chosenFile, setFileData] = useState(null);
-
-  // const childToParent = (childData) => {
-  //   setFileData(childData);
-  //   console.log('Play container has blob:', childData);
-  // };
 
   return (
     <div style={containerStyle}>
@@ -37,8 +29,7 @@ const PlayContainer = (props) => {
         onCountdownFinished={onCountdownFinished}
         duration={duration}
       />
-      {/* <PlayDropdown childToParent={childToParent} />
-      {getAudioSelection(chosenFile)} */}
+      <PlayDropdown setAudioSelection={setAudioSelection} />
     </div>
   );
 };

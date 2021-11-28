@@ -12,7 +12,7 @@ const PlayheadStyle = {
 };
 
 const ProgressBar = (props) => {
-  const { state, showProgress, height, width, duration } = props;
+  const { height } = props;
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     setInterval(() => {

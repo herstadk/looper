@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { IconContext } from 'react-icons';
 import { BsRecordFill } from 'react-icons/bs';
 import { Colors } from '../../styles/colors';
-import { CSSTransition } from 'react-transition-group';
 import './RecordingIndicator.css';
 
 const iconStyle = {
