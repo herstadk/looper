@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Slider from '@mui/material/Slider';
 import '../../styles/pageStyle.css';
+import { Colors } from '../../styles/colors.js';
 
 const PanSlider = (props) => {
   const { getPanValueFromBar, panFilter } = props;
@@ -42,6 +43,12 @@ const PanSlider = (props) => {
         valueLabelDisplay="auto"
         getAriaValueText={valuetext}
         marks={marks}
+        sx={{
+          color: Colors.green,
+          '& .MuiSlider-markLabel': {
+            color: Colors.yellow,
+          },
+        }}
       />
       {getPanValueFromBar(panValue, panFilter)}
     </>

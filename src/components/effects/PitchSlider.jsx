@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Slider from '@mui/material/Slider';
 import '../../styles/pageStyle.css';
+import { Colors } from '../../styles/colors.js';
 
 const PitchSlider = (props) => {
   const { getPitchValueFromBar, pitchFilter } = props;
@@ -42,7 +43,7 @@ const PitchSlider = (props) => {
   return (
     <>
       {'Pitch'}
-      <Slider
+      <Slider 
         aria-label="Steps"
         defaultValue={0.0}
         step={0.05}
@@ -52,6 +53,12 @@ const PitchSlider = (props) => {
         valueLabelDisplay="auto"
         getAriaValueText={valuetext}
         marks={marks}
+        sx={{
+          color: Colors.green,
+          '& .MuiSlider-markLabel': {
+            color: Colors.yellow,
+          },
+        }}
       />
       {getPitchValueFromBar(pitchValue, pitchFilter)}
     </>

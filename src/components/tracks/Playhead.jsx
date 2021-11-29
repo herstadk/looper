@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react/cjs/react.development';
+import React, { useState, useEffect } from 'react';
 import { Colors } from '../../styles/colors';
 import * as Tone from 'tone';
 
@@ -11,7 +10,7 @@ const PlayheadStyle = {
   opacity: 1,
 };
 
-const ProgressBar = (props) => {
+const Playhead = (props) => {
   const { height } = props;
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -31,4 +30,4 @@ const ProgressBar = (props) => {
   );
 };
 
-export default ProgressBar;
+export default Playhead;
