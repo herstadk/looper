@@ -53,6 +53,7 @@ const PitchSlider = (props) => {
         valueLabelDisplay="auto"
         getAriaValueText={valuetext}
         marks={marks}
+        size="small"
         sx={{
           color: Colors.green,
           '& .MuiSlider-markLabel': {

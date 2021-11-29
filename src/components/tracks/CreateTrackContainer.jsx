@@ -295,14 +295,14 @@ const CreateTrackContainer = (props) => {
           />
         </div>
         <div class="container-editBar">
-        <EditBar
-          getPitchValueFromBar={getPitchValueFromBar}
-          getPanValueFromBar={getPanValueFromBar}
-          reverseAudio={reverseAudio}
-          pitchFilters={pitchFilters}
-          panFilters={panFilters}
-          players={players}
-        />
+          <EditBar
+            getPitchValueFromBar={getPitchValueFromBar}
+            getPanValueFromBar={getPanValueFromBar}
+            reverseAudio={reverseAudio}
+            pitchFilters={pitchFilters}
+            panFilters={panFilters}
+            players={players}
+          />
         </div>
       </div>
     </div>

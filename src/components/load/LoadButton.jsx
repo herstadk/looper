@@ -11,7 +11,7 @@ const SaveButton = ({ loadFetchedAudioBuffers, setMediaBlobUrls }) => {
 
     return (
         <>
-        <button onClick={() => displayLoadModal(setModalDisplay)}>
+        <button onClick={() => displayLoadModal(setModalDisplay)} className="modal-button" >
             Load Session
         </button>
         <LoadModal

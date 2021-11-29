@@ -29,9 +29,6 @@ const ControlPanel = (props) => {
       ) : (
         <PlayButton onClick={startPlayback} />
       )}
-      {/* <LoopControlRow
-        initializeRecording={(numBars) => handleStartRecording(numBars)}
-      /> */}
       <div
         style={{
           display: 'flex',

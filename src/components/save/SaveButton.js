@@ -11,7 +11,7 @@ const SaveButton = ({ mediaBlobUrls }) => {
 
     return (
         <>
-        <button onClick={() => displaySaveModal(setModalDisplay)}>
+        <button onClick={() => displaySaveModal(setModalDisplay)} className="modal-button" >
             Save Session
         </button>
         <SaveModal 
