@@ -25,7 +25,9 @@ const LoopControlRow = (props) => {
         {barCountOptions.map((bco) => (
           <StartLoopButton
             number={bco}
-            onClick={() => initializeRecording(bco)}
+            onClick={() => {
+              initializeRecording(bco);
+            }}
             key={bco}
           />
         ))}

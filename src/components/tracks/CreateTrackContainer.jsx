@@ -2,20 +2,14 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
+import GetTrack from './GetTrack';
+import { getBlob } from '../../utils/blobs';
 import '../../styles/pageStyle.css';
+import '../../styles/infoStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
 import * as Tone from 'tone';
-
-
-const containerStyle = {
-  height: '100%',
-  width: '100%',
-  display: 'flex',
-  flexFlow: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
+import { getSecPerBeat } from '../../utils/audio';
 
 const initialState = {
   initiatingCountdown: false,
@@ -39,8 +33,17 @@ const reducer = (state, action) => {
       return {
         ...state,
         recording: false,
-        playingAudio: false,
         expiryTimestamp: undefined,
+      };
+    case 'PLAYBACK_STARTED':
+      return {
+        ...state,
+        playingAudio: true,
+      };
+    case 'PLAYBACK_ENDED':
+      return {
+        ...state,
+        playingAudio: false,
       };
     case 'COUNTDOWN_STARTED':
       return {
@@ -66,22 +69,61 @@ const CreateTrackContainer = (props) => {
   const [players, setPlayers] = useState([]); // Tone.js list of players for each audio buffer
   const [pitchFilters, setPitchFilters] = useState([]); // tracking pitch filters for each player
   const [panFilters, setPanFilters] = useState([]);
-  const [barsPerLoop, setBarsPerLoop] = useState(undefined);
-  // const [pitchValue, setPitchValueFromBar] = useState(null);  // used to set pitch value for Tone.js
+  const [barsPerLoop, setBarsPerLoop] = useState(4);
   const { status, startRecording, stopRecording } = useReactMediaRecorder({
     video: false,
     audio: true,
     blobOptions: { type: 'audio/mpeg' },
     onStop: (mediaBlobUrl) => addMediaBlobUrl({ mediaBlobUrl }),
   });
-
-  const getSecPerBeat = () => {
-    return 1 / (bpm / 60);
+  const getAudioSettings = () => {
+    return {
+      bpm: bpm,
+      beatsPerBar: beatsPerBar,
+      barsPerLoop: barsPerLoop,
+      maxBarsPerLoop: maxBarsPerLoop,
+    };
   };
 
-  const getFullDuration = () => {
-    return maxBarsPerLoop * beatsPerBar * getSecPerBeat();
+  const getTrackDuration = () => {
+    return maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm);
   };
+
+  const createPlayerFromBuffer = useCallback(
+    (buffer) => {
+      // init pitch shift filter
+      const pitchShift = new Tone.PitchShift();
+      const toneFFT = new Tone.FFT(); // fast fourier transformation for frequency
+      pitchShift.connect(toneFFT);
+      setPitchFilters((curPitchFilters) => [...curPitchFilters, pitchShift]);
+
+      // init panner filter
+      const panner = new Tone.Panner();
+      setPanFilters((curPanFilters) => [...curPanFilters, panner]);
+      pitchShift.chain(panner, Tone.Destination);
+
+      // init player for each loop
+      const loops = maxBarsPerLoop / barsPerLoop;
+      for (let i = 0; i < loops; i++) {
+        const player = new Tone.Player(buffer);
+        player.chain(pitchShift);
+        player.sync().start(`${i * barsPerLoop}m`);
+        setPlayers((curPlayers) => [...curPlayers, player]);
+      }
+    },
+    [barsPerLoop, maxBarsPerLoop]
+  );
+
+  const addAudioBuffer = useCallback(
+    (newAudioBuffer) => {
+      setAudioBuffers((curAudioBuffers) => [
+        ...curAudioBuffers,
+        newAudioBuffer,
+      ]);
+      createPlayerFromBuffer(newAudioBuffer);
+    },
+    [createPlayerFromBuffer]
+  );
 
   const loadAudioBuffer = useCallback(
     (mediaBlobUrl) => {
@@ -97,7 +139,7 @@ const CreateTrackContainer = (props) => {
 
       request.send();
     },
-    [audioContext]
+    [audioContext, addAudioBuffer]
   );
 
   const loadFetchedAudioBuffers = useCallback(
@@ -109,31 +151,6 @@ const CreateTrackContainer = (props) => {
     [loadAudioBuffer]
   );
 
-  // useEffect(() => {
-  //   /**
-  //    *
-  //    *
-  //    * Testing get requests from azure
-  //    *
-  //    *
-  //    */
-  //   async function myfunc() {
-  //     let allBlobs = await getAllBlobs();
-  //     loadFetchedAudioBuffers(allBlobs);
-  //     setMediaBlobUrls([...allBlobs]);
-  //   }
-  //   myfunc();
-  //   /**
-  //    *
-  //    *
-  //    *
-  //    * End testing get requests
-  //    *
-  //    *
-  //    *
-  //    */
-  // }, [loadFetchedAudioBuffers]);
-
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
     setMediaBlobUrls((curMediaBlobUrls) => [
@@ -143,59 +160,21 @@ const CreateTrackContainer = (props) => {
     loadAudioBuffer(newMediaBlobUrl.mediaBlobUrl);
   };
 
-  const addAudioBuffer = (newAudioBuffer) => {
-    setAudioBuffers((curAudioBuffers) => [...curAudioBuffers, newAudioBuffer]);
-  };
-
-  // create players and filters
   useEffect(() => {
-    let allPlayers = [];
-    let allPitchFilters = [];
-    let allPanFilters = [];
-
-    for (let buffer of audioBuffers) {
-      // init pitch shift filter
-      let pitchShift = new Tone.PitchShift();
-      let toneFFT = new Tone.FFT(); // fast fourier transformation for frequency
-      pitchShift.connect(toneFFT);
-
-      // init panner filter
-      let panner = new Tone.Panner();
-
-      // init player
-      let player = new Tone.Player(buffer);
-      player.chain(pitchShift, panner, Tone.Destination);
-      player.loop = true;
-      player.autostart = true;
-
-      allPlayers.push(player);
-      allPitchFilters.push(pitchShift);
-      allPanFilters.push(panner);
-    }
-
-    setPlayers(allPlayers);
-    setPitchFilters(allPitchFilters);
-    setPanFilters(allPanFilters);
-  }, [audioBuffers]);
+    Tone.Transport.bpm.value = bpm;
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = '0m';
+    Tone.Transport.loopEnd = `${maxBarsPerLoop}m`;
+  }, [bpm, maxBarsPerLoop]);
 
   const playAudio = () => {
-    if (mediaBlobUrls.length === 0) {
-      return; // don't attempt to play without any audio elements loaded
-    }
-
-    // play all audio
-    startAllPlayers();
+    Tone.Transport.start();
+    dispatch({ type: 'PLAYBACK_STARTED' });
   };
 
-  const startAllPlayers = () => {
-    for (let player of players) {
-      player.start();
-    }
-  }
-
-  const startCountdown = () => {
-    const time = setTimer(3);
-    return time;
+  const pauseAudio = () => {
+    Tone.Transport.pause();
+    dispatch({ type: 'PLAYBACK_ENDED' });
   };
 
   const onCountdownFinished = () => {
@@ -211,7 +190,6 @@ const CreateTrackContainer = (props) => {
 
   const stopLoopRecording = () => {
     stopRecording();
-    stopPlayback();
   };
 
   const setTimer = (duration) => {
@@ -221,38 +199,39 @@ const CreateTrackContainer = (props) => {
   };
 
   const startLoopRecording = () => {
-    const duration = barsPerLoop * beatsPerBar * getSecPerBeat();
+    const duration = barsPerLoop * beatsPerBar * getSecPerBeat(bpm);
     const time = setTimer(duration);
     startRecording();
     return time;
   };
 
-  const stopPlayback = () => {
-    for (let player of players) {
-      player.stop();
-    }
-  };
-
   const handleStartRecording = (numBars) => {
-    if (state.recording || state.countingDown || state.playingAudio) {
-      return;
-    }
+    if (state.recording || state.countingDown) return;
 
     if (status === 'permission_denied') {
       console.log('Permission denied');
       return;
     }
+    if (numBars > maxBarsPerLoop) return;
+    if (!state.playingAudio) Tone.Transport.stop(); // reset time incase paused
+    Tone.start();
     setBarsPerLoop(numBars);
-    const time = startCountdown();
+
+    const progress = Tone.Transport.progress;
+    const delay = state.playingAudio
+      ? (1 - progress) * maxBarsPerLoop * beatsPerBar * getSecPerBeat(bpm)
+      : 3;
+
+    const time = setTimer(delay);
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
   // changes pitch of audio in real time during playback
-	const getPitchValueFromBar = (data, pitchFilter) => {
+  const getPitchValueFromBar = (data, pitchFilter) => {
     if (pitchFilter !== null && pitchFilter !== undefined) {
-      pitchFilter.pitch = data;  // bad form right hurrrrrrrrrrrrrrrrr?????????????
+      pitchFilter.pitch = data; // bad form right hurrrrrrrrrrrrrrrrr?????????????
     }
-	};
+  };
 
   // changes panning of audio in real time during plaback
   const getPanValueFromBar = (data, panFilter) => {
@@ -266,48 +245,71 @@ const CreateTrackContainer = (props) => {
     if (player !== null && player !== undefined) {
       if (checked) {
         player.reverse = true;
-      }
-      else {
+      } else {
         player.reverse = false;
       }
     }
   };
 
   return (
-    <div style={containerStyle}>
+    <div class="container-createTrack">
+      
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <div class="flex-container">
-        <div class="flex-child left">
-          <ControlPanel
-            state={state}
-            mediaBlobUrls={mediaBlobUrls}
-            loadFetchedAudioBuffers={loadFetchedAudioBuffers}
-            setMediaBlobUrls={setMediaBlobUrls}
-            handleStartRecording={handleStartRecording}
-            stopPlayback={stopPlayback}
-            stopRecording={stopLoopRecording}
-          />
-          <PlayContainer
-            tracks={audioBuffers}
-            state={state}
-            onCountdownFinished={onCountdownFinished}
-            duration={getFullDuration()}
+      <div class="container-leftBlock">
+          <div class="container-controls">
+            <ControlPanel
+              state={state}
+              mediaBlobUrls={mediaBlobUrls}
+              loadFetchedAudioBuffers={loadFetchedAudioBuffers}
+              setMediaBlobUrls={setMediaBlobUrls}
+              handleStartRecording={handleStartRecording}
+              startPlayback={playAudio}
+              stopPlayback={pauseAudio}
+              stopRecording={stopLoopRecording}
+            />
+          </div>
+          <div class="container-playBars">
+            <PlayContainer
+              audioSettings={getAudioSettings()}
+              tracks={audioBuffers}
+              state={state}
+              onCountdownFinished={onCountdownFinished}
+              duration={getTrackDuration()}
+            />
+          </div>
+      </div>
+      <div className="container-rightBlock">
+        <div class="container-info">
+          <h1 class="info">Loopr</h1>
+          <p class="info-text">
+            CS467 Project created by Josh Kyser, Kyler Herstad, Josh Fiedler 
+          </p>
+          <button
+            onClick={async () => {
+              const blob = await getBlob(audioSelection);
+              addMediaBlobUrl(blob);
+            }}
+          >
+            Get Track
+          </button>
+          <GetTrack
+            setAudioSelection={setAudioSelection}
           />
         </div>
-        <div class="flex-child right">
-          <EditBar
-            getPitchValueFromBar={getPitchValueFromBar}
-            getPanValueFromBar={getPanValueFromBar}
-            reverseAudio={reverseAudio}
-            pitchFilters={pitchFilters}
-            panFilters={panFilters}
-            players={players}
-          />
+        <div class="container-editBar">
+        <EditBar
+          getPitchValueFromBar={getPitchValueFromBar}
+          getPanValueFromBar={getPanValueFromBar}
+          reverseAudio={reverseAudio}
+          pitchFilters={pitchFilters}
+          panFilters={panFilters}
+          players={players}
+        />
         </div>
       </div>
     </div>
