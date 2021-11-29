@@ -85,7 +85,7 @@ const getBlob = async (blobName) => {
     //return { mediaBlob, saved: true };
 };
 
-const postBlob = async (blob, name) => {
+const postBlob = async (blob, name, errorCheck) => {
     // add required headers
     const blobHeaders = new Headers();
     blobHeaders.append('x-ms-version', versionHeader);
@@ -104,10 +104,9 @@ const postBlob = async (blob, name) => {
         body: blob
     })
     .then(res => {
-        if (res.ok) {
-            alert("Audio file saved!");
-        } else {
-            alert("Something went wrong with saving the audio file: " + res.statusText);
+        if (!res.ok) {
+            errorCheck.error = true;
+            errorCheck.message = res.statusText;
         }
     })
     .catch(err => {

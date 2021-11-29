@@ -1,5 +1,4 @@
 import React from 'react';
-import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
 import PlayButton from './PlayButton';
@@ -20,7 +19,6 @@ const ControlPanel = (props) => {
     state,
     startPlayback,
     stopPlayback,
-    mediaBlobUrls,
     handleStartRecording,
   } = props;
 
@@ -31,7 +29,9 @@ const ControlPanel = (props) => {
       ) : (
         <PlayButton onClick={startPlayback} />
       )}
-      <SaveButton mediaBlobUrls={mediaBlobUrls} />
+      {/* <LoopControlRow
+        initializeRecording={(numBars) => handleStartRecording(numBars)}
+      /> */}
       <div
         style={{
           display: 'flex',
