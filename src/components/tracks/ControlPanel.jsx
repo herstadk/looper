@@ -21,6 +21,8 @@ const ControlPanel = (props) => {
     stopRecording,
     mediaBlobUrls,
     handleStartRecording,
+    loadFetchedAudioBuffers,
+    setMediaBlobUrls,
   } = props;
 
   return (
@@ -32,7 +34,7 @@ const ControlPanel = (props) => {
         stopRecording={stopRecording}
       />
       <SaveButton mediaBlobUrls={mediaBlobUrls} />
-      <LoadButton />
+      <LoadButton setMediaBlobUrls={setMediaBlobUrls} loadFetchedAudioBuffers={loadFetchedAudioBuffers} />
       <LoopControlRow
         initializeRecording={(numBars) => handleStartRecording(numBars)}
       />

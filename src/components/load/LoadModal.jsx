@@ -4,10 +4,9 @@
  *
 ************************/
 
-import React, { useEffect } from 'react';
-import {postBlob} from '../../utils/blobs';
-import {v4 as uuidv4} from 'uuid';
+import React, { useEffect, useState } from 'react';
 import '../../styles/pageStyle.css';
+import {getBlob} from '../../utils/blobs';
 
 
 const getModalStyle = (modalDisplay) => {
@@ -20,7 +19,6 @@ const getModalStyle = (modalDisplay) => {
         width: '100%', /* Full width */
         height: '100%', /* Full height */
         overflow: 'auto', /* Enable scroll if needed */
-        // backgroundColor: 'rgb(0,0,0)', /* Fallback color */
         backgroundColor: 'rgba(0,0,0,0.4)', /* Black w/ opacity */
     };
 };
@@ -32,8 +30,9 @@ const modalContentStyle = {
     padding: '20px',
     border: '1px solid #888',
     width: '80%', /* Could be more or less, depending on screen size */
+    height: '50%',
     borderRadius: '5px',
-}
+};
 
 /* The Close Button */
 const closeButtonStyle = {
@@ -41,126 +40,172 @@ const closeButtonStyle = {
     float: 'right',
     fontSize: '28px',
     fontWeight: 'bold',
-}
+};
 
-const closeSaveModal = (setModalDisplay) => {
-    document.getElementById('session-name').value = '';
-    document.getElementById('session-description').value = '';
+const tableStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+};
+
+const rowStyle = {
+    display: 'flex',
+};
+
+const cellStyle = {
+    width: '32%',
+    border: '1px solid black',
+    borderWidth: '0 1px 1px 1px',
+    paddingLeft: '5px',
+};
+
+const headerStyle = {
+    width: '32%',
+    fontWeight: 'bolder',
+    border: '1px solid black',
+    paddingLeft: '5px',
+};
+
+const closeLoadModal = (setModalDisplay) => {
     setModalDisplay('none');
 };
 
-const SaveModal = (props) => {
-    const {modalDisplay, setModalDisplay, mediaBlobUrls} = props;
+const getAllSessions = async () => {
+    let sessionsObject = await fetch('http://loopr.us-west-1.elasticbeanstalk.com/api/audio').then(res => res.json());
+    let sessions = sessionsObject['$values'];
+    return sessions;
+};
+
+const LoadModal = (props) => {
+    const {modalDisplay, setModalDisplay, loadFetchedAudioBuffers, setMediaBlobUrls} = props;
+    const [sessions, setSessions] = useState([]);
 
     useEffect(() => {
-        function hideModal(e) {
-            let modal = document.getElementById('modal');
+        function hideLoadModal(e) {
+            let modal = document.getElementById('load-modal');
 
             if (e.target === modal) {
                 setModalDisplay('none');
             }
         }
 
-        window.addEventListener('click', hideModal);
+        window.addEventListener('click', hideLoadModal);
 
         return () => {
-            window.removeEventListener('click', hideModal);
+            window.removeEventListener('click', hideLoadModal);
         }
     });
 
-    async function saveSession(e) {
-        e.preventDefault();
-
-        // get session name
-        let sessionName = document.getElementById('session-name').value;
-        if (sessionName === undefined || sessionName === null || sessionName.length === 0) {
-            alert('Please enter a name for your session.');
-            return;
+    // populate sessions list with existing sessions
+    useEffect(() => {
+        async function populateList() {
+            let allSessions = await getAllSessions();
+            setSessions(allSessions);
         }
+        populateList();
+    }, []);
 
-        // get session description
-        let sessionDescription = document.getElementById('session-description').value;
-        if (sessionDescription === undefined || sessionDescription === null || sessionDescription.length === 0) {
-            alert('Please enter a description for your session.');
-            return;
-        }
-    
-        // session object to save
-        let session = {
-            SessionName: sessionName,
-            SessionDate: new Date().toISOString().slice(0, 10).replace('T', ' '),
-            SessionDescription: sessionDescription
-        };
-    
-        let tracks = []
-        for (let i = 0; i < mediaBlobUrls.length; i++) {
-            let trackName = uuidv4();
-            tracks.push({ TrackName: trackName });
-        }
-    
-        let sessionTrackDto = {
-            Session: session,
-            Tracks: tracks
-        }
-
-        let errorCheck = {
-            error: false,
-            message: null
-        };  // tracking is there was an error in saving
-
-        // save session and tracks in AWS database
-        await fetch('http://loopr.us-west-1.elasticbeanstalk.com/api/audio', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(sessionTrackDto)
-        })
-        .then(res => {
-            if (!res.ok) {
-                errorCheck.error = true;
-                errorCheck.message = res.statusText;
+    // change color of selected row so user knows which sessions is being loaded
+    const changeSelected = (e) => {
+        // deactivate last selected row
+        let activeRows = document.getElementsByClassName('active-row');
+        for (let row of activeRows) {
+            let childrenToDeactivate = row.children;
+            for (let child of childrenToDeactivate) {
+                child.style.backgroundColor = 'white';
             }
-        });
-    
-        // save the audio file to Azure
-        // turn each blob url into a blob object before saving
-        for (let i = 0; i < mediaBlobUrls.length; i++) {
-            let mediaBlob = await fetch(mediaBlobUrls[i].mediaBlobUrl).then(b => b.blob());
-            postBlob(mediaBlob, tracks[i].TrackName, errorCheck);
+            row.classList.remove('active-row')
         }
 
-        if (errorCheck.error) {
-            alert("Oops, something went wrong saving your audio file: " + errorCheck.message);
-        } else {
-            alert("Session saved!");
+        // make selected row active
+        let children = e.currentTarget.children;
+        for (let child of children) {
+            child.style.backgroundColor = 'yellow';
+        }
+        e.currentTarget.classList.add('active-row');
+    };
+
+    // load selected session into the current session
+    const loadSession = async () => {
+        let sessionToLoadList = document.getElementsByClassName('active-row');
+        // don't load if there isn't anything to load or sessionsToLoadList
+        // isn't one item in length
+        if (sessionToLoadList.length === 0 || sessionToLoadList.length > 1) {
+            alert('Please select a session to load.');
+            return;
+        }
+        let sessionName = sessionToLoadList[0].children[0].textContent;
+        let sessionToLoad = null;
+
+        // get the session we need
+        for (let session of sessions) {
+            if (session.sessionName === sessionName) {
+                sessionToLoad = session;
+                break;
+            }
         }
 
-        // clear forms and close modal
-        document.getElementById('session-name').value = '';
-        document.getElementById('session-description').value = '';
+        // don't do anything if session did not exist
+        if (sessionToLoad === null) {
+            alert('Please select a session to load.');
+            return;
+        }
+
+        // get all of the tracks
+        let trackObjects = await fetch(`http://loopr.us-west-1.elasticbeanstalk.com/api/audio/${sessionToLoad.sessionId}`)
+                              .then(res => res.json())
+                              .then(sessionObj => sessionObj.tracks['$values']);
+
+        // get all blobs from azure and load them into program
+        let blobs = [];
+        for (let track of trackObjects) {
+            let blob = await getBlob(track.trackName);
+            blobs.push(blob);
+        }
+
+        loadFetchedAudioBuffers(blobs);
+        setMediaBlobUrls([...blobs]);
+
+        // close modal
         setModalDisplay('none');
-    }
+    };
 
     return (
-        <div style={getModalStyle(modalDisplay)} id="modal">
+        <div style={getModalStyle(modalDisplay)} id="load-modal">
             <div style={modalContentStyle}>
-                <span style={closeButtonStyle} className="close" onClick={() => closeSaveModal(setModalDisplay)}>&times;</span>
-                <form onSubmit={saveSession} >
-                    <label htmlFor="session-name">Session Name: </label>
-                    <input id="session-name" type="textarea" />
-                    <br />
-
-                    <label htmlFor="session-description">Session Description: </label>
-                    <textarea id="session-description"></textarea>
-                    <br />
-
-                    <input type="submit" value="Save" />
-                </form>
+                <span style={closeButtonStyle} className="close" onClick={() => closeLoadModal(setModalDisplay)}>&times;</span>
+                <div style={tableStyle}>
+                    <div style={rowStyle}>
+                        <div style={headerStyle}>
+                            Session Name
+                        </div>
+                        <div style={headerStyle}>
+                            Date
+                        </div>
+                        <div style={headerStyle}>
+                            Description
+                        </div>
+                    </div>
+                    {sessions.map(session => {
+                        return (
+                            <div style={rowStyle} onClick={changeSelected}>
+                                <div style={cellStyle}>
+                                    {session.sessionName}
+                                </div>
+                                <div style={cellStyle}>
+                                    {session.sessionDate.substring(0, 10)}
+                                </div>
+                                <div style={cellStyle}>
+                                    {session.sessionDescription}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <button onClick={loadSession}>Load</button>
             </div>
         </div>
     );
 };
 
 
-export default SaveModal;
+export default LoadModal;

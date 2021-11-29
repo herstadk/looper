@@ -2,7 +2,6 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
-import { getAllBlobs } from '../../utils/blobs';
 import '../../styles/pageStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
 import Timer from './Timer';
@@ -110,30 +109,30 @@ const CreateTrackContainer = (props) => {
     [loadAudioBuffer]
   );
 
-  useEffect(() => {
-    /**
-     *
-     *
-     * Testing get requests from azure
-     *
-     *
-     */
-    async function myfunc() {
-      let allBlobs = await getAllBlobs();
-      loadFetchedAudioBuffers(allBlobs);
-      setMediaBlobUrls([...allBlobs]);
-    }
-    myfunc();
-    /**
-     *
-     *
-     *
-     * End testing get requests
-     *
-     *
-     *
-     */
-  }, [loadFetchedAudioBuffers]);
+  // useEffect(() => {
+  //   /**
+  //    *
+  //    *
+  //    * Testing get requests from azure
+  //    *
+  //    *
+  //    */
+  //   async function myfunc() {
+  //     let allBlobs = await getAllBlobs();
+  //     loadFetchedAudioBuffers(allBlobs);
+  //     setMediaBlobUrls([...allBlobs]);
+  //   }
+  //   myfunc();
+  //   /**
+  //    *
+  //    *
+  //    *
+  //    * End testing get requests
+  //    *
+  //    *
+  //    *
+  //    */
+  // }, [loadFetchedAudioBuffers]);
 
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
@@ -248,11 +247,6 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
-  // const [audioSelection, setAudioSelection] = useState(null);
-  // const getAudioSelection = (childData) => {
-	//   setAudioSelection(childData);
-  // };
-
   // changes pitch of audio in real time during playback
 	const getPitchValueFromBar = (data, pitchFilter) => {
     if (pitchFilter !== null && pitchFilter !== undefined) {
@@ -281,13 +275,6 @@ const CreateTrackContainer = (props) => {
 
   return (
     <div style={containerStyle}>
-      {/* <button onClick={async () => {
-        const blob = await getBlob(audioSelection);
-        console.log("Blob", blob);
-        addMediaBlobUrl(blob);
-      }}>
-        Get Track
-      </button> */}
       {state.recording ? (
         <Timer
           onExpire={onRecordingFinished}
@@ -299,6 +286,8 @@ const CreateTrackContainer = (props) => {
           <ControlPanel
             state={state}
             mediaBlobUrls={mediaBlobUrls}
+            loadFetchedAudioBuffers={loadFetchedAudioBuffers}
+            setMediaBlobUrls={setMediaBlobUrls}
             handleStartRecording={handleStartRecording}
             stopPlayback={stopPlayback}
             stopRecording={stopLoopRecording}

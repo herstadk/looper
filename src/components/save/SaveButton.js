@@ -12,7 +12,7 @@ const SaveButton = ({ mediaBlobUrls }) => {
     return (
         <>
         <button onClick={() => displaySaveModal(setModalDisplay)}>
-            Save audio
+            Save Session
         </button>
         <SaveModal 
             modalDisplay={modalDisplay}

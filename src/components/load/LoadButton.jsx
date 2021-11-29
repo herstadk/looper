@@ -6,18 +6,19 @@ const displayLoadModal = (setModalDisplay) => {
     setModalDisplay('block');
 };
 
-const SaveButton = ({ mediaBlobUrls }) => {
+const SaveButton = ({ loadFetchedAudioBuffers, setMediaBlobUrls }) => {
     const [modalDisplay, setModalDisplay] = useState('none');
 
     return (
         <>
-        <button onClick={() => displaySaveModal(setModalDisplay)}>
-            Save audio
+        <button onClick={() => displayLoadModal(setModalDisplay)}>
+            Load Session
         </button>
-        <SaveModal 
+        <LoadModal
             modalDisplay={modalDisplay}
             setModalDisplay={setModalDisplay}
-            mediaBlobUrls={mediaBlobUrls}
+            loadFetchedAudioBuffers={loadFetchedAudioBuffers}
+            setMediaBlobUrls={setMediaBlobUrls}
         />
         </>
     );
