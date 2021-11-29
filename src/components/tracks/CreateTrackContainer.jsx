@@ -2,8 +2,7 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
-import GetTrack from './GetTrack';
-import { getBlob } from '../../utils/blobs';
+import ModalButtons from './ModalButtons';
 import '../../styles/pageStyle.css';
 import '../../styles/infoStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
@@ -142,39 +141,14 @@ const CreateTrackContainer = (props) => {
     [audioContext, addAudioBuffer]
   );
 
-  // const loadFetchedAudioBuffers = useCallback(
-  //   (allBlobs) => {
-  //     for (const blob of allBlobs) {
-  //       loadAudioBuffer(blob.mediaBlobUrl);
-  //     }
-  //   },
-  //   [loadAudioBuffer]
-  // );
-
-  // useEffect(() => {
-  //   /**
-  //    *
-  //    *
-  //    * Testing get requests from azure
-  //    *
-  //    *
-  //    */
-  //   async function myfunc() {
-  //     let allBlobs = await getAllBlobs();
-  //     loadFetchedAudioBuffers(allBlobs);
-  //     setMediaBlobUrls([...allBlobs]);
-  //   }
-  //   myfunc();
-  //   /**
-  //    *
-  //    *
-  //    *
-  //    * End testing get requests
-  //    *
-  //    *
-  //    *
-  //    */
-  // }, [loadFetchedAudioBuffers]);
+  const loadFetchedAudioBuffers = useCallback(
+    (allBlobs) => {
+      for (const blob of allBlobs) {
+        loadAudioBuffer(blob.mediaBlobUrl);
+      }
+    },
+    [loadAudioBuffer]
+  );
 
   const addMediaBlobUrl = (newMediaBlobUrl) => {
     newMediaBlobUrl.saved = false;
@@ -251,8 +225,6 @@ const CreateTrackContainer = (props) => {
     dispatch({ type: 'COUNTDOWN_STARTED', payload: { expiryTimestamp: time } });
   };
 
-  const [audioSelection, setAudioSelection] = useState(undefined);
-
   // changes pitch of audio in real time during playback
   const getPitchValueFromBar = (data, pitchFilter) => {
     if (pitchFilter !== null && pitchFilter !== undefined) {
@@ -292,6 +264,8 @@ const CreateTrackContainer = (props) => {
             <ControlPanel
               state={state}
               mediaBlobUrls={mediaBlobUrls}
+              loadFetchedAudioBuffers={loadFetchedAudioBuffers}
+              setMediaBlobUrls={setMediaBlobUrls}
               handleStartRecording={handleStartRecording}
               startPlayback={playAudio}
               stopPlayback={pauseAudio}
@@ -314,16 +288,10 @@ const CreateTrackContainer = (props) => {
           <p class="info-text">
             CS467 Project created by Josh Kyser, Kyler Herstad, Josh Fiedler 
           </p>
-          <button
-            onClick={async () => {
-              const blob = await getBlob(audioSelection);
-              addMediaBlobUrl(blob);
-            }}
-          >
-            Get Track
-          </button>
-          <GetTrack
-            setAudioSelection={setAudioSelection}
+          <ModalButtons 
+            mediaBlobUrls={mediaBlobUrls}
+            setMediaBlobUrls={setMediaBlobUrls}
+            loadFetchedAudioBuffers={loadFetchedAudioBuffers}
           />
         </div>
         <div class="container-editBar">

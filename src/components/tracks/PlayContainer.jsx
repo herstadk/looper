@@ -1,6 +1,7 @@
 import React from 'react';
 import BlockContainer from './BlockContainer';
 
+
 const containerStyle = {
   display: 'flex',
   width: '100%',
