@@ -7,7 +7,7 @@ const rowStyle = {
   gap: 2,
   alignItems: 'stretch',
   justifyContent: 'space-between',
-  height: '100px',
+  height: '120px',
   width: '100%',
 };
 
@@ -28,7 +28,7 @@ const BlockRow = (props) => {
   const totalWaveformDivisions = 300;
   const divisionsPerLoop = Math.floor(totalWaveformDivisions / numLoops);
   return (
-    <div style={rowStyle}>
+    <div class="block" style={rowStyle}>
       {[...Array(numLoops)].map((_, idx) => {
         return (
           <Block

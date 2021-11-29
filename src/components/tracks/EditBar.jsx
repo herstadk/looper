@@ -45,6 +45,7 @@ const EditBar = (props) => {
   } = props;
 
   return (
+<<<<<<< HEAD
     <div className="item-editBar" style={outerContainerStyle} >
       <div style={innerContainerStyle}>
       {pitchFilters.map((pitchFilter, index) => {
@@ -66,6 +67,25 @@ const EditBar = (props) => {
                 panFilter={panFilters[index]}
               />
             </div>
+=======
+    <div class="item-editBar">
+      {pitchFilters.map((pitchFilter, index) => {
+        return (
+          <div class="item-editTools" key={index}>
+            <PitchSlider
+              getPitchValueFromBar={getPitchValueFromBar}
+              pitchFilter={pitchFilter}
+            />
+            <ReverseSwitch
+              reverseAudio={reverseAudio}
+              player={players[index]}
+            />
+            <PanSlider
+              getPanValueFromBar={getPanValueFromBar}
+              panFilter={panFilters[index]}
+            />
+            <hr />
+>>>>>>> main
           </div>
         );
       })}

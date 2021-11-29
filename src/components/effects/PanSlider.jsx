@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Slider from '@mui/material/Slider';
 import '../../styles/pageStyle.css';
+import '../../styles/editStyle.css';
 import { Colors } from '../../styles/colors.js';
 
 const PanSlider = (props) => {
@@ -31,7 +32,7 @@ const PanSlider = (props) => {
   };
 
   return (
-    <>
+    <div class="editTool">
       {'Pan'}
       <Slider
         aria-label="Steps"
@@ -45,6 +46,7 @@ const PanSlider = (props) => {
         marks={marks}
         size="small"
         sx={{
+          width: '90%',
           color: Colors.green,
           '& .MuiSlider-markLabel': {
             color: Colors.yellow,
@@ -52,7 +54,7 @@ const PanSlider = (props) => {
         }}
       />
       {getPanValueFromBar(panValue, panFilter)}
-    </>
+    </div>
   );
 };
 
