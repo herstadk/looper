@@ -8,6 +8,7 @@ const containerStyle = {
   height: '100%',
   alignItems: 'center',
   justifyContent: 'space-around',
+  flexDirection: 'columns',
 };
 
 const PlayContainer = (props) => {
@@ -20,7 +21,7 @@ const PlayContainer = (props) => {
   } = props;
 
   return (
-    <div style={containerStyle}>
+    <div class="container-blockContainer" style={containerStyle}>
       <BlockContainer
         audioSettings={audioSettings}
         tracks={tracks}

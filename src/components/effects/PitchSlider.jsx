@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Slider from '@mui/material/Slider';
 import '../../styles/pageStyle.css';
+import '../../styles/editStyle.css';
 import { Colors } from '../../styles/colors.js';
 
 const PitchSlider = (props) => {
@@ -41,7 +42,7 @@ const PitchSlider = (props) => {
   };
 
   return (
-    <>
+    <div class="editTool">
       {'Pitch'}
       <Slider 
         aria-label="Steps"
@@ -54,6 +55,7 @@ const PitchSlider = (props) => {
         getAriaValueText={valuetext}
         marks={marks}
         sx={{
+          width: '90%',
           color: Colors.green,
           '& .MuiSlider-markLabel': {
             color: Colors.yellow,
@@ -61,7 +63,7 @@ const PitchSlider = (props) => {
         }}
       />
       {getPitchValueFromBar(pitchValue, pitchFilter)}
-    </>
+    </div>
   );
 };
 

@@ -16,10 +16,10 @@ const EditBar = (props) => {
   } = props;
 
   return (
-    <div className="item-editBar">
+    <div class="item-editBar">
       {pitchFilters.map((pitchFilter, index) => {
         return (
-          <div key={index}>
+          <div class="item-editTools" key={index}>
             <PitchSlider
               getPitchValueFromBar={getPitchValueFromBar}
               pitchFilter={pitchFilter}
@@ -28,7 +28,6 @@ const EditBar = (props) => {
               reverseAudio={reverseAudio}
               player={players[index]}
             />
-            <br />
             <PanSlider
               getPanValueFromBar={getPanValueFromBar}
               panFilter={panFilters[index]}
