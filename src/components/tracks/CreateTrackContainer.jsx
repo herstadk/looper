@@ -286,7 +286,7 @@ const CreateTrackContainer = (props) => {
         <div class="container-info">
           <h1 class="info">Loopr</h1>
           <p class="info-text">
-            CS467 Project created by Josh Kyser, Kyler Herstad, Josh Fiedler 
+            CS467 Project created by Josh Kyser, Kyle Herstad, Josh Fiedler 
           </p>
           <ModalButtons 
             mediaBlobUrls={mediaBlobUrls}
@@ -295,14 +295,14 @@ const CreateTrackContainer = (props) => {
           />
         </div>
         <div class="container-editBar">
-        <EditBar
-          getPitchValueFromBar={getPitchValueFromBar}
-          getPanValueFromBar={getPanValueFromBar}
-          reverseAudio={reverseAudio}
-          pitchFilters={pitchFilters}
-          panFilters={panFilters}
-          players={players}
-        />
+          <EditBar
+            getPitchValueFromBar={getPitchValueFromBar}
+            getPanValueFromBar={getPanValueFromBar}
+            reverseAudio={reverseAudio}
+            pitchFilters={pitchFilters}
+            panFilters={panFilters}
+            players={players}
+          />
         </div>
       </div>
     </div>

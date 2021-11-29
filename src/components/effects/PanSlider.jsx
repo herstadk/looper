@@ -44,6 +44,7 @@ const PanSlider = (props) => {
         valueLabelDisplay="auto"
         getAriaValueText={valuetext}
         marks={marks}
+        size="small"
         sx={{
           width: '90%',
           color: Colors.green,

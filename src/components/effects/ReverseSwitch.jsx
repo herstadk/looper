@@ -19,6 +19,7 @@ const ReverseSwitch = (props) => {
             control={<Switch 
                 onChange={handleSwitchChange} 
                 checked={checked} 
+                size="small"
                 sx={{
                     '& .MuiSwitch-colorPrimary': {
                       color: Colors.green,

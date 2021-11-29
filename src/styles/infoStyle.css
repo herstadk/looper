@@ -5,8 +5,10 @@
 
 .info {
     color: var(--yellow);
+    padding-left: 15px;
 }
 
 .info-text {
     color: var(--yellow);
+    padding-left: 15px;
 }

@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import '../../styles/pageStyle.css';
 import {getBlob} from '../../utils/blobs';
+import {Colors} from '../../styles/colors';
 
 
 const getModalStyle = (modalDisplay) => {
@@ -32,6 +33,7 @@ const modalContentStyle = {
     width: '80%', /* Could be more or less, depending on screen size */
     height: '50%',
     borderRadius: '5px',
+    position: 'relative',
 };
 
 /* The Close Button */
@@ -52,16 +54,17 @@ const rowStyle = {
 };
 
 const cellStyle = {
-    width: '32%',
-    border: '1px solid black',
-    borderWidth: '0 1px 1px 1px',
+    width: '33%',
+    border: '1px dotted black',
+    borderWidth: '1px 0 1px 0',
     paddingLeft: '5px',
 };
 
 const headerStyle = {
-    width: '32%',
+    width: '33%',
     fontWeight: 'bolder',
-    border: '1px solid black',
+    border: '1px dotted black',
+    borderWidth: '1px 0 0 0',
     paddingLeft: '5px',
 };
 
@@ -119,7 +122,7 @@ const LoadModal = (props) => {
         // make selected row active
         let children = e.currentTarget.children;
         for (let child of children) {
-            child.style.backgroundColor = 'yellow';
+            child.style.backgroundColor = Colors.green;
         }
         e.currentTarget.classList.add('active-row');
     };
@@ -187,7 +190,7 @@ const LoadModal = (props) => {
                     </div>
                     {sessions.map(session => {
                         return (
-                            <div style={rowStyle} onClick={changeSelected}>
+                            <div style={rowStyle} onClick={changeSelected} className="modal-load-row">
                                 <div style={cellStyle}>
                                     {session.sessionName}
                                 </div>
@@ -201,7 +204,7 @@ const LoadModal = (props) => {
                         );
                     })}
                 </div>
-                <button onClick={loadSession}>Load</button>
+                <button onClick={loadSession} className="modal-load-button">Load</button>
             </div>
         </div>
     );
