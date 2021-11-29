@@ -155,7 +155,7 @@ const SaveModal = (props) => {
                     <textarea id="session-description"></textarea>
                     <br />
 
-                    <input type="submit" value="Save" />
+                    <input type="submit" value="Save" className="modal-save-button"/>
                 </form>
             </div>
         </div>

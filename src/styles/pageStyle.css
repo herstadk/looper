@@ -113,3 +113,46 @@
     background-color: #A6E22E;
     cursor: pointer;
 }
+
+/* Load modal styles */
+.modal-load-row:hover {
+    cursor: pointer;
+    background-color: #A6E22E;
+}
+
+.modal-load-button {
+    transition-duration: 0.4s;
+    border-radius: 5px;
+    background-color: #272822;
+    border: 1px solid #A6E22E;
+    color: #A6E22E;
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 100px;
+    height: 30px;
+}
+
+.modal-load-button:hover {
+    color: #272822;
+    background-color: #A6E22E;
+    cursor: pointer;
+}
+
+/* Save modal styles */
+.modal-save-button {
+    transition-duration: 0.4s;
+    border-radius: 5px;
+    background-color: #272822;
+    border: 1px solid #A6E22E;
+    color: #A6E22E;
+    width: 100px;
+    height: 30px;
+    margin-top: 20px;
+}
+
+.modal-save-button:hover {
+    color: #272822;
+    background-color: #A6E22E;
+    cursor: pointer;
+}

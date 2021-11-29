@@ -26,12 +26,13 @@ const innerContainerStyle = {
 const effectsOuterContainerStyle = {
   display: 'flex',
   width: '100%',
+  borderBottom: '1px dotted gray',
+  paddingBottom: '18px',
 }
 
 const effectsInnerContainerStyle = {
   width: '50%',
   padding: '0 20px 0 20px',
-  borderBottom: '1px dotted gray'
 }
 
 const EditBar = (props) => {
