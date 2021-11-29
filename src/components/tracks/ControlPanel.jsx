@@ -1,8 +1,6 @@
 import React from 'react';
-import SaveButton from '../save/SaveButton';
 import { Colors } from '../../styles/colors';
 import LoopControlRow from './LoopControlRow';
-import LoadButton from '../load/LoadButton';
 import PlayButton from './PlayButton';
 import StopButton from './StopButton';
 import RecordingIndicator from './RecordingIndicator';
@@ -21,10 +19,7 @@ const ControlPanel = (props) => {
     state,
     startPlayback,
     stopPlayback,
-    mediaBlobUrls,
     handleStartRecording,
-    loadFetchedAudioBuffers,
-    setMediaBlobUrls,
   } = props;
 
   return (
