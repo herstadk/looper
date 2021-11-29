@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { Colors } from '../../styles/colors.js';
+import '../../styles/editStyle.css';
 
 const ReverseSwitch = (props) => {
     const {player, reverseAudio} = props;
@@ -13,6 +14,7 @@ const ReverseSwitch = (props) => {
     };
 
     return (
+        <div class="editTool">
         <FormControlLabel 
             control={<Switch 
                 onChange={handleSwitchChange} 
@@ -24,6 +26,7 @@ const ReverseSwitch = (props) => {
                   }}/>} 
             label="Reverse"
         />
+        </div>
     );
 };
 
