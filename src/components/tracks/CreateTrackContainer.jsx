@@ -2,8 +2,7 @@ import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import ControlPanel from './ControlPanel';
 import PlayContainer from './PlayContainer';
 import EditBar from './EditBar';
-import GetTrack from './GetTrack';
-import { getBlob } from '../../utils/blobs';
+import ModalButtons from './ModalButtons';
 import '../../styles/pageStyle.css';
 import '../../styles/infoStyle.css';
 import { useReactMediaRecorder } from 'react-media-recorder';
@@ -289,16 +288,10 @@ const CreateTrackContainer = (props) => {
           <p class="info-text">
             CS467 Project created by Josh Kyser, Kyler Herstad, Josh Fiedler 
           </p>
-          <button
-            onClick={async () => {
-              const blob = await getBlob(audioSelection);
-              addMediaBlobUrl(blob);
-            }}
-          >
-            Get Track
-          </button>
-          <GetTrack
-            setAudioSelection={setAudioSelection}
+          <ModalButtons 
+            mediaBlobUrls={mediaBlobUrls}
+            setMediaBlobUrls={setMediaBlobUrls}
+            loadFetchedAudioBuffers={loadFetchedAudioBuffers}
           />
         </div>
         <div class="container-editBar">

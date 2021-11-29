@@ -34,11 +34,9 @@ const ControlPanel = (props) => {
       ) : (
         <PlayButton onClick={startPlayback} />
       )}
-      <SaveButton mediaBlobUrls={mediaBlobUrls} />
-      <LoadButton setMediaBlobUrls={setMediaBlobUrls} loadFetchedAudioBuffers={loadFetchedAudioBuffers} />
-      <LoopControlRow
+      {/* <LoopControlRow
         initializeRecording={(numBars) => handleStartRecording(numBars)}
-      />
+      /> */}
       <div
         style={{
           display: 'flex',
