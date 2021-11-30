@@ -4,6 +4,7 @@ import '../../styles/editStyle.css';
 import PanSlider from '../effects/PanSlider';
 import PitchSlider from '../effects/PitchSlider';
 import ReverseSwitch from '../effects/ReverseSwitch';
+import MonoStereoDropDown from '../effects/MonoStereoDropDown';
 
 
 const outerContainerStyle = {
@@ -43,6 +44,7 @@ const EditBar = (props) => {
     pitchFilters,
     players,
     reverseAudio,
+    handleChannelCountChange,
   } = props;
 
   return (
@@ -61,10 +63,14 @@ const EditBar = (props) => {
                 player={players[index]}
               />
             </div>
-            <div style={effectsInnerContainerStyle}>
+            <div style={effectsInnerContainerStyle} key={index + 1000}>
               <PanSlider
                 getPanValueFromBar={getPanValueFromBar}
                 panFilter={panFilters[index]}
+              />
+              <MonoStereoDropDown 
+                handleChannelCountChange={handleChannelCountChange}
+                player={players[index]}
               />
             </div>
           </div>

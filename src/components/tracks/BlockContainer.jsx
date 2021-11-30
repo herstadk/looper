@@ -38,7 +38,7 @@ const BlockContainer = (props) => {
   const { height, ref } = useResizeDetector();
 
   return (
-    <div class="playBar" style={outerContainerStyle}>
+    <div className="playBar" style={outerContainerStyle}>
       <Playhead
         state={state}
         showProgress

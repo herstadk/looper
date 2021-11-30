@@ -105,6 +105,7 @@ const CreateTrackContainer = (props) => {
       const loops = maxBarsPerLoop / barsPerLoop;
       for (let i = 0; i < loops; i++) {
         const player = new Tone.Player(buffer);
+        player.channelCount = 1;  // default to mono track
         player.chain(pitchShift);
         player.sync().start(`${i * barsPerLoop}m`);
         setPlayers((curPlayers) => [...curPlayers, player]);
@@ -250,8 +251,20 @@ const CreateTrackContainer = (props) => {
     }
   };
 
+  // switches player between Mono (1 channel) and Stereo (2 channels)
+  const handleChannelCountChange = (numChannels, setNumChannels, player) => {
+    if (numChannels === 1) {
+      player.channelCount = 2;
+      setNumChannels(2);
+    }
+    else {
+      player.channelCount = 1;
+      setNumChannels(1);
+    }
+  };
+
   return (
-    <div class="container-createTrack">
+    <div className="container-createTrack">
       
       {state.recording ? (
         <Timer
@@ -259,8 +272,8 @@ const CreateTrackContainer = (props) => {
           expiryTimestamp={state.expiryTimestamp}
         />
       ) : undefined}
-      <div class="container-leftBlock">
-          <div class="container-controls">
+      <div className="container-leftBlock">
+          <div className="container-controls">
             <ControlPanel
               state={state}
               mediaBlobUrls={mediaBlobUrls}
@@ -272,7 +285,7 @@ const CreateTrackContainer = (props) => {
               stopRecording={stopLoopRecording}
             />
           </div>
-          <div class="container-playBars">
+          <div className="container-playBars">
             <PlayContainer
               audioSettings={getAudioSettings()}
               tracks={audioBuffers}
@@ -283,9 +296,9 @@ const CreateTrackContainer = (props) => {
           </div>
       </div>
       <div className="container-rightBlock">
-        <div class="container-info">
-          <h1 class="info">Loopr</h1>
-          <p class="info-text">
+        <div className="container-info">
+          <h1 className="info">Loopr</h1>
+          <p className="info-text">
             CS467 Project created by Josh Kyser, Kyle Herstad, Josh Fiedler 
           </p>
           <ModalButtons 
@@ -294,7 +307,7 @@ const CreateTrackContainer = (props) => {
             loadFetchedAudioBuffers={loadFetchedAudioBuffers}
           />
         </div>
-        <div class="container-editBar">
+        <div className="container-editBar">
           <EditBar
             getPitchValueFromBar={getPitchValueFromBar}
             getPanValueFromBar={getPanValueFromBar}
@@ -302,6 +315,7 @@ const CreateTrackContainer = (props) => {
             pitchFilters={pitchFilters}
             panFilters={panFilters}
             players={players}
+            handleChannelCountChange={handleChannelCountChange}
           />
         </div>
       </div>
