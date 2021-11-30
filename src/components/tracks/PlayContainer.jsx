@@ -21,7 +21,7 @@ const PlayContainer = (props) => {
   } = props;
 
   return (
-    <div class="container-blockContainer" style={containerStyle}>
+    <div className="container-blockContainer" style={containerStyle}>
       <BlockContainer
         audioSettings={audioSettings}
         tracks={tracks}

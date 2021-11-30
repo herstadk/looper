@@ -188,9 +188,9 @@ const LoadModal = (props) => {
                             Description
                         </div>
                     </div>
-                    {sessions.map(session => {
+                    {sessions.map((session, index) => {
                         return (
-                            <div style={rowStyle} onClick={changeSelected} className="modal-load-row">
+                            <div style={rowStyle} onClick={changeSelected} className="modal-load-row" key={index}>
                                 <div style={cellStyle}>
                                     {session.sessionName}
                                 </div>
