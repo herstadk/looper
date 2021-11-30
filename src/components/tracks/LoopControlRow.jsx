@@ -17,7 +17,7 @@ const rowStyle = {
 
 const LoopControlRow = (props) => {
   const { initializeRecording } = props;
-  const barCountOptions = [1, 2, 4, 8];
+  const barCountOptions = [1, 2, 4];
 
   return (
     <div style={rowContainerStyle}>
