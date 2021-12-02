@@ -73,7 +73,7 @@ const closeLoadModal = (setModalDisplay) => {
 };
 
 const getAllSessions = async () => {
-    let sessionsObject = await fetch('http://loopr.us-west-1.elasticbeanstalk.com/api/audio').then(res => res.json());
+    let sessionsObject = await fetch('https://loopraudio.com/api/audio').then(res => res.json());
     let sessions = sessionsObject['$values'];
     return sessions;
 };

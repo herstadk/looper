@@ -109,7 +109,7 @@ const SaveModal = (props) => {
         };  // tracking is there was an error in saving
 
         // save session and tracks in AWS database
-        await fetch('http://loopr.us-west-1.elasticbeanstalk.com/api/audio', {
+        await fetch('https://loopraudio.com/api/audio', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
