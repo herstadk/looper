@@ -154,7 +154,7 @@ const LoadModal = (props) => {
         }
 
         // get all of the tracks
-        let trackObjects = await fetch(`http://loopr.us-west-1.elasticbeanstalk.com/api/audio/${sessionToLoad.sessionId}`)
+        let trackObjects = await fetch(`https://loopraudio.com/api/audio/${sessionToLoad.sessionId}`)
                               .then(res => res.json())
                               .then(sessionObj => sessionObj.tracks['$values']);
 
